@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Endless — Waifu Math Clash</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { overflow: hidden; background: #1a1a2e; }
+    #area-boss { position: relative; width: 100%; height: 38vh; overflow: hidden; background: #2a2a3e; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    #boss-img-wrap { width: 140px; height: 140px; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.35); border: 2px solid rgba(255,255,255,0.2); background: linear-gradient(135deg,#FF7FA0 0%, #3EC99E 100%); display: flex; align-items: center; justify-content: center; }
+    #boss-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #boss-img-fallback { width: 56px; height: 56px; stroke: #fff; display: none; }
+    #boss-nama { margin-top: 10px; font-weight: 800; color: #fff; font-size: 0.95rem; letter-spacing: 0.02em; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    #boss-hp-label { font-size: 0.7rem; font-weight: 700; color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.35); padding: 2px 8px; border-radius: 999px; margin-top: 4px; }
+    #label-giliran { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+    #area-info { background: #fff; padding: 0.75rem 1rem; }
+    #area-log { flex: 1; overflow-y: auto; background: #f8fffe; padding: 0.5rem 1rem; border-top: 1px solid #eee; border-bottom: 1px solid #eee; display: flex; }
+    .log-item { font-size: 0.8rem; color: var(--teks-sekunder); padding: 2px 0; }
+    #area-aksi { background: #fff; padding: 0.75rem 1rem; min-height: 100px; }
+    .slot-rarity { flex: 1; border-radius: 12px; border: 2px solid #eee; padding: 0.5rem; text-align: center; cursor: pointer; transition: border-color 0.15s, transform 0.15s; background: #fafafa; }
+    .slot-rarity:active { transform: scale(0.96); }
+    .slot-rarity.disabled { opacity: 0.4; cursor: not-allowed; }
+    .slot-gambar-mini { width: 100%; aspect-ratio: 3/4; border-radius: 6px; overflow: hidden; background: #eee; margin-bottom: 4px; }
+    .slot-gambar-mini img { width: 100%; height: 100%; object-fit: cover; }
+    .btn-jawab { width: 100%; padding: 0.6rem 0.5rem; border-radius: 12px; border: 2px solid var(--primary); background: #fff; color: var(--teks); font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.15s, transform 0.1s; }
+    .btn-jawab:active { transform: scale(0.97); background: var(--bg); }
+    .btn-jawab.benar { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-jawab.salah { background: var(--aksen); color: #fff; border-color: var(--aksen); }
+  </style>
+</head>
+<body class="flex flex-col" style="height: 100vh;">
+  <!-- Screen 1: Info & Syarat -->
+  <div id="screen-info" class="fixed inset-0 flex flex-col z-[500]" style="background: var(--bg);">
+    <div class="flex-1 flex flex-col items-center justify-center px-6 py-8 overflow-y-auto">
+      <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl mb-4" style="background: linear-gradient(135deg,#3EC99E,#FF7FA0); color:#fff; box-shadow: 0 8px 24px rgba(62,201,158,0.3);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px;height:40px;"><path d="M12 2l7 4v6c0 5-3.5 7.5-7 8-3.5-.5-7-3-7-8V6l7-4z"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+      </div>
+      <h1 class="text-2xl font-extrabold text-center" style="color: var(--teks);">Endless Mode</h1>
+      <p class="text-xs font-semibold mb-3" style="color: var(--teks-sekunder);">Bertahan selama mungkin • 1x per hari ∞</p>
+
+      <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-md mb-4">
+        <h3 class="font-extrabold text-sm mb-3" style="color: var(--teks);">Peraturan:</h3>
+        <ul class="space-y-2 text-sm" style="color: var(--teks-sekunder);">
+          <li class="flex gap-2"><span>•</span><span>Syarat main: punya minimal <b>1 kartu tiap rarity</b> (Common, Rare, Epic).</span></li>
+          <li class="flex gap-2"><span>•</span><span>Pilih rarity → jawab soal. Benar = lanjut, Salah/timeout = langsung selesai.</span></li>
+          <li class="flex gap-2"><span>•</span><span>Boss HP <b>unlimited</b> — tidak mati, kamu farming damage.</span></li>
+          <li class="flex gap-2"><span>•</span><span>Reward: <b>1 Key Silver per 200 damage</b>, max <b>10 / hari</b>. Cap di 2000 dmg.</span></li>
+          <li class="flex gap-2"><span>•</span><span>Hanya 1x per hari. AFK &amp; Surrender = selesai &amp; hitung reward.</span></li>
+        </ul>
+      </div>
+
+      <div id="info-status" class="w-full max-w-sm mb-4 hidden">
+        <div id="info-gate" class="bg-white rounded-2xl p-4 shadow-md text-sm" style="color: var(--teks-sekunder);"></div>
+      </div>
+
+      <button id="btn-mulai-endless" class="btn-utama w-full max-w-sm" style="padding: 1rem; font-size: 1.1rem;">
+        <span style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Mulai Endless
+        </span>
+      </button>
+      <p id="info-reward-preview" class="text-xs font-bold mt-2" style="color: var(--primary);"></p>
+      <a href="minigame.html" class="text-sm font-bold mt-4" style="color: var(--teks-sekunder);">← Kembali ke Minigame</a>
+    </div>
+  </div>
+
+  <!-- Screen 2: Loading -->
+  <div id="screen-loading" class="fixed inset-0 flex flex-col items-center justify-center z-[600] hidden" style="background: var(--bg);">
+    <div class="spinner" style="width: 56px; height: 56px; border-width: 5px;"></div>
+    <p class="font-extrabold text-lg mt-4" style="color: var(--primary);">Menyiapkan endless...</p>
+  </div>
+
+  <!-- Screen 3: Arena Endless — atas hanya boss, waifu stay di selector bawah -->
+  <div id="screen-arena" class="flex flex-col flex-1 hidden" style="height: 100vh;">
+    <div id="area-boss">
+      <div id="boss-img-wrap">
+        <img id="boss-img" src="" alt="Boss" onerror="this.style.display='none'; document.getElementById('boss-img-fallback').style.display='block';">
+        <svg id="boss-img-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 4v6c0 5-3.5 7.5-7 8-3.5-.5-7-3-7-8V6l7-4z"/><circle cx="12" cy="11" r="3"/><path d="M9 17l3-3 3 3"/></svg>
+      </div>
+      <div id="boss-nama">BOSS ∞</div>
+      <div id="boss-hp-label">HP ∞ • Tidak terkalahkan</div>
+      <div id="label-giliran">Endless • Round 1</div>
+      <div id="damage-container" style="position: absolute; inset: 0; pointer-events: none;"></div>
+    </div>
+
+    <div id="area-info" style="display: flex; gap: 0.75rem; align-items: center;">
+      <div style="flex: 1;">
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs font-bold" style="color: var(--teks);">Total Damage</span>
+          <span id="txt-total-damage" class="text-xs font-extrabold" style="color: var(--primary);">0</span>
+        </div>
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs font-bold" style="color: var(--teks-sekunder);">Round</span>
+          <span id="txt-round" class="text-xs font-bold" style="color: var(--teks);">0</span>
+        </div>
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs font-bold" style="color: var(--teks-sekunder);">Reward</span>
+          <span id="txt-reward" class="text-xs font-bold" style="color: var(--aksen);">0 / 10 <img src="assets/ui/icon_key_silver.svg" alt="key" style="width:1em;height:1em;vertical-align:middle;display:inline;"> (cap 2000 dmg)</span>
+        </div>
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs font-bold" style="color: var(--teks-sekunder);">Boss HP</span>
+          <span class="text-xs font-bold" style="color: var(--aksen);">∞</span>
+        </div>
+        <div id="wrap-timer" class="hidden mt-1">
+          <div class="timer-bar-wrap"><div id="timer-bar" class="timer-bar-fill" style="width: 100%;"></div></div>
+          <p id="timer-teks" class="text-right text-xs font-bold mt-1" style="color: var(--aksen);">10 detik</p>
+        </div>
+      </div>
+      <button id="btn-surrender" style="flex-shrink:0; background: var(--aksen); color:#fff; border:none; border-radius:12px; padding:0.6rem 1rem; font-size:0.75rem; font-weight:800; cursor:pointer; box-shadow:0 2px 8px rgba(255,127,160,0.3); white-space:nowrap;">Surrender</button>
+    </div>
+
+    <div id="area-log"><div id="isi-log"><p class="log-item">Endless dimulai! Jawab benar terus ∞</p></div></div>
+
+    <div id="area-aksi">
+      <div id="state-pilih-kartu" class="hidden">
+        <p class="text-xs font-bold mb-2 text-center" style="color: var(--teks-sekunder);">Pilih kartu untuk lanjut:</p>
+        <div class="flex gap-2" id="slot-rarity-wrap"></div>
+      </div>
+      <div id="state-soal" class="hidden">
+        <p id="teks-soal" class="text-center text-xl font-extrabold mb-3" style="color: var(--teks);">...</p>
+        <div id="opsi-jawaban" class="grid grid-cols-2 gap-2"></div>
+      </div>
+      <div id="state-tunggu" class="hidden text-center py-2">
+        <p class="text-sm font-semibold" style="color: var(--teks-sekunder);">Menyiapkan soal...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Surrender -->
+  <div id="modal-surrender" class="modal-overlay hidden" style="z-index: 8500;">
+    <div class="modal-box text-center">
+      <div class="text-4xl mb-3">🏳️</div>
+      <h3 class="modal-judul">Menyerah?</h3>
+      <p class="text-sm mb-5" style="color: var(--teks-sekunder);">Progress akan disimpan &amp; reward dihitung. Yakin?</p>
+      <button id="btn-confirm-surrender" class="btn-utama mb-2" style="background: var(--aksen);">Ya, Selesai</button>
+      <button id="btn-cancel-surrender" class="btn-outline">Batal</button>
+    </div>
+  </div>
+
+  <!-- Modal Cap 10 -->
+  <div id="modal-cap" class="modal-overlay hidden" style="z-index: 8600;">
+    <div class="modal-box text-center">
+      <div class="text-4xl mb-3">🎉</div>
+      <h3 class="modal-judul">Cap Hadiah Tercapai!</h3>
+      <p class="text-sm mb-2" style="color: var(--teks-sekunder);">Kamu sudah capai <b>2000 damage → 10 Key Silver</b> (max/hari).</p>
+      <p class="text-sm mb-5" style="color: var(--teks-sekunder);">Mau lanjut main (tanpa hadiah tambahan) atau selesai &amp; klaim?</p>
+      <button id="btn-cap-lanjut" class="btn-utama mb-2">Lanjutkan</button>
+      <button id="btn-cap-selesai" class="btn-aksen">Selesai &amp; Klaim</button>
+    </div>
+  </div>
+
+  <!-- Modal Hasil -->
+  <div id="modal-hasil" class="modal-overlay hidden" style="z-index: 9000;">
+    <div class="modal-box text-center">
+      <div id="hasil-icon" class="text-5xl mb-3">💫</div>
+      <h3 id="hasil-judul" class="modal-judul text-2xl">Selesai!</h3>
+      <p id="hasil-desc" class="text-sm mb-1" style="color: var(--teks-sekunder);">Total Damage: 0</p>
+      <p id="hasil-reward" class="text-lg font-extrabold mb-5" style="color: var(--primary);">+0 Key Silver</p>
+      <button id="btn-kembali" class="btn-utama">Kembali ke Minigame</button>
+    </div>
+  </div>
+
+  <div id="konfeti-container" style="position: fixed; inset: 0; pointer-events: none; z-index: 8999; overflow: hidden;"></div>
+
+  <script type="module" src="js/game-endless.js"></script>
+</body>
+</html>
