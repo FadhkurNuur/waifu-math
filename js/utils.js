@@ -284,6 +284,69 @@ export function createNumberPad(containerEl, opts = {}) {
   }
 }
 
+// ===== QWERTY Alphabet Pad (untuk game-decoder) =====
+// Layout QWERTY 3 baris: QWERTYUIOP / ASDFGHJKL / ZXCVBNM + del
+// Pakai: createQwertyPad(containerEl, { onSubmit, onChange })
+// onSubmit menerima huruf string "A".."Z"
+export function createQwertyPad(containerEl, opts = {}) {
+  const onSubmit = opts.onSubmit || (()=>{})
+  const onChange = opts.onChange || (()=>{})
+  let value = ''
+  containerEl.innerHTML = `
+    <div class="qwerty-display input-field text-center font-extrabold" style="font-size:1.5rem; letter-spacing:0.12em; min-height:48px; display:flex; align-items:center; justify-content:center; background:#fff;"></div>
+    <div class="qwerty-grid" style="display:flex; flex-direction:column; gap:6px; margin-top:8px;"></div>
+    <button class="btn-utama qwerty-kirim" style="margin-top:8px;">Kirim Huruf</button>
+  `
+  const display = containerEl.querySelector('.qwerty-display')
+  const grid = containerEl.querySelector('.qwerty-grid')
+  const btnKirim = containerEl.querySelector('.qwerty-kirim')
+  function renderDisplay() {
+    display.textContent = value || '—'
+    display.style.color = value ? 'var(--teks)' : 'var(--teks-sekunder)'
+    onChange(value)
+  }
+  function inputKey(k) {
+    if (k === 'del') value = ''
+    else {
+      value = k
+      renderDisplay()
+      // auto preview
+    }
+    renderDisplay()
+  }
+  const rows = ['QWERTYUIOP','ASDFGHJKL','ZXCVBNM']
+  rows.forEach(row => {
+    const r = document.createElement('div')
+    r.style.cssText = 'display:flex; gap:4px; justify-content:center;'
+    for (const ch of row) {
+      const b = document.createElement('button')
+      b.type = 'button'
+      b.textContent = ch
+      b.style.cssText = 'flex:1; max-width:36px; padding:0.6rem 0; border-radius:8px; border:1.5px solid #e8ecef; background:#fff; font-family:Nunito,sans-serif; font-size:0.95rem; font-weight:800; color:var(--teks); cursor:pointer;'
+      b.addEventListener('click', ()=> inputKey(ch))
+      r.appendChild(b)
+    }
+    if (row === 'ZXCVBNM') {
+      const del = document.createElement('button')
+      del.type='button'; del.textContent='⌫'; del.style.cssText='flex:0 0 52px; padding:0.6rem 0; border-radius:8px; border:1.5px solid var(--aksen); background:#fff; color:var(--aksen); font-weight:800; cursor:pointer;'
+      del.addEventListener('click', ()=> inputKey('del'))
+      r.appendChild(del)
+    }
+    grid.appendChild(r)
+  })
+  btnKirim.onclick = ()=> {
+    if (!value || !/^[A-Z]$/.test(value)) { showToast('Pilih huruf A-Z dulu'); return }
+    onSubmit(value)
+  }
+  renderDisplay()
+  return {
+    getValue: ()=> value,
+    setValue: (v)=> { value = String(v||'').toUpperCase().slice(0,1); renderDisplay() },
+    clear: ()=> { value=''; renderDisplay() },
+    destroy: ()=> { containerEl.innerHTML='' }
+  }
+}
+
 // Pre-cache gambar ke CacheStorage agar kunjungan berikutnya tidak fetch ulang
 // Dipanggil otomatis oleh lazy loader, tapi bisa juga manual
 export async function preCacheImages(urls) {
