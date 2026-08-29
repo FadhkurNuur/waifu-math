@@ -1,0 +1,26 @@
+{
+  "name": "waifu-math-apk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Wrapper Capacitor untuk https://waifu-math.vercel.app - hanya WebView",
+  "type": "module",
+  "scripts": {
+    "build": "echo \"no build needed - webDir www sudah siap\"",
+    "cap:add:android": "npx cap add android",
+    "cap:sync": "npx cap sync",
+    "cap:open:android": "npx cap open android",
+    "cap:copy": "npx cap copy",
+    "apk:debug": "cd android && ./gradlew assembleDebug",
+    "apk:release": "cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/splash-screen": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.0"
+  }
+}

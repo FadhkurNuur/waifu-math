@@ -74,3 +74,14 @@ AGENTS.md
 # ===== Cache =====
 .cache/
 .parcel-cache/
+
+# ===== Capacitor APK build (folder apk/ tetap dipush, tapi build output di-ignore) =====
+apk/node_modules/
+apk/android/
+apk/ios/
+apk/dist/
+apk/.gradle/
+apk/*.apk
+apk/*.aab
+apk/*.keystore
+apk/*.jks

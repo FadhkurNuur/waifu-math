@@ -1,0 +1,18 @@
+# Capacitor APK — ignore build & deps
+node_modules/
+android/
+ios/
+dist/
+www/build/
+
+# Gradle
+.gradle/
+gradle/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Env local
+.env
+.env.local

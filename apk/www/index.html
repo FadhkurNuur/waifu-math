@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waifu Math Clash</title>
+  <style>
+    body { font-family: sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; background:#EDFCF6; color:#2E3A35; text-align:center; }
+    a { color:#3EC99E; font-weight:800; }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>Waifu Math Clash</h1>
+    <p>Fallback offline — app akan load <br><a href="https://waifu-math.vercel.app">https://waifu-math.vercel.app</a></p>
+    <p style="opacity:.6; font-size:.8rem;">Jika tidak redirect otomatis, cek koneksi internet lalu restart app.</p>
+  </div>
+  <script>
+    // Jika Capacitor server.url gagal, fallback redirect manual
+    if (location.hostname !== 'waifu-math.vercel.app') {
+      // diamkan, Capacitor akan load server.url
+    }
+  </script>
+</body>
+</html>

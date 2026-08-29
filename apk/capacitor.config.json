@@ -1,0 +1,25 @@
+{
+  "appId": "com.fadhkur.waifumath",
+  "appName": "Waifu Math Clash",
+  "webDir": "www",
+  "server": {
+    "url": "https://waifu-math.vercel.app",
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "backgroundColor": "#EDFCF6"
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#3EC99E"
+    }
+  }
+}
