@@ -11,7 +11,7 @@ Game web turn-based PvP matematika — pilih kartu waifu, jawab soal untuk menye
 - **Gacha** — rate Common 95% / Rare 4% / Epic 1%, hard pity Rare 15 & Epic 25 (counter independen), reveal clip-path wipe
 - **Koleksi** — per banner (Epic→Rare→Common), swipe 3:4, upgrade bintang `ceil(base_atk * (1+stars*0.2))`, set favorite
 - **Minigame Hub** — list card game (`minigame.html`)
-  - **Game Casual** (`game-casual.html`, rename dari `battle.html`) — PvE vs Bot, 3 slot rarity random, soal via Edge Function, timer 5–10 detik, HP = Rank×100, AFK detection
+  - **Game Casual** (`game-casual.html`) — PvE vs Bot, 3 slot rarity random, soal via Edge Function, timer 5–10 detik, HP = Rank×100, AFK detection
   - **Game Raid** (`game-raid.html`) — placeholder Coming Soon (co-op boss)
 - **Shop** — tukar Epic `is_shop=true` pakai Key Gold
 - **Profil** — stats `player_stats`, ubah username/password, logout
@@ -36,9 +36,8 @@ waifu-math-clash/
 ├── gacha.html          # list banner → detail → reveal
 ├── collection.html     # list banner dimiliki → detail swipe
 ├── minigame.html       # HUB: card list Game Casual / Raid / …
-├── game-casual.html    # Battle PvE (rename dari battle.html)
+├── game-casual.html    # Battle PvE
 ├── game-raid.html      # Placeholder raid (soon)
-├── battle.html         # redirect kompatibilitas → game-casual.html
 ├── shop.html           # grid Epic shop
 ├── profil.html         # profil + stats
 ├── css/style.css       # variabel mint/rose, portrait lock, card, nav, dll
@@ -49,7 +48,6 @@ waifu-math-clash/
 │   ├── gacha.js        # pity, cache, reveal
 │   ├── collection.js   # koleksi + upgrade + favorite
 │   ├── game-casual.js  # battle turn, soal, timer, bot, AFK
-│   ├── battle.js       # alias kompatibilitas → game-casual
 │   ├── shop.js         # beli Epic pakai gold
 │   ├── profil.js       # stats & setting
 │   └── utils.js        # sleep, toast, rank/HP/ATK, lazy-load, SW, cache

@@ -596,6 +596,11 @@ async function giliranBot() {
   }
 
   if (data.status === 'finished') {
+    try {
+      await supabase.functions.invoke('selesai-battle', {
+        body: { battle_id: battle.id, winner: data.winner }
+      })
+    } catch {}
     selesaiBattle(data.winner)
     return
   }
