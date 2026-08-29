@@ -5,7 +5,8 @@
   "server": {
     "url": "https://waifu-math.vercel.app",
     "cleartext": true,
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "allowNavigation": ["waifu-math.vercel.app", "*.waifu-math.vercel.app"]
   },
   "android": {
     "allowMixedContent": true,
@@ -20,6 +21,9 @@
     "StatusBar": {
       "style": "LIGHT",
       "backgroundColor": "#3EC99E"
+    },
+    "ScreenOrientation": {
+      "orientation": "portrait"
     }
   }
 }

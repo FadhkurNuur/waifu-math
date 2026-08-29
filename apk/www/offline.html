@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Offline — Waifu Math Clash</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#EDFCF6; --primary:#3EC99E; --aksen:#FF7FA0; --teks:#2E3A35; --teks-sekunder:#85A89E; }
+    * { box-sizing:border-box; font-family:'Nunito',sans-serif; }
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--teks); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center; }
+    .card { background:#fff; border-radius:24px; padding:28px 20px; width:100%; max-width:360px; box-shadow:0 8px 32px rgba(62,201,158,0.15); }
+    .icon { width:72px; height:72px; border-radius:20px; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:36px; margin:0 auto 16px; }
+    h1 { margin:0 0 8px; font-size:22px; font-weight:900; }
+    p { margin:0 0 6px; color:var(--teks-sekunder); font-size:14px; line-height:1.5; }
+    .btn { width:100%; margin-top:18px; background:var(--primary); color:#fff; border:none; border-radius:999px; padding:14px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 16px rgba(62,201,158,0.3); }
+    .btn:active { transform:scale(0.98); }
+    .btn-secondary { background:#fff; color:var(--primary); border:2px solid var(--primary); box-shadow:none; margin-top:10px; }
+    .hint { margin-top:14px; font-size:12px; opacity:0.6; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🌸</div>
+    <h1>Koneksi Putus</h1>
+    <p>Waifu menunggu koneksi kamu kembali.</p>
+    <p>Periksa internet lalu tekan Coba Lagi.</p>
+    <button class="btn" id="btn-retry">Coba Lagi</button>
+    <button class="btn btn-secondary" id="btn-exit">Keluar App</button>
+    <p class="hint">Portrait only • Tekan back 2x untuk keluar</p>
+  </div>
+  <script type="module">
+    import { Network } from '@capacitor/network'
+    import { App } from '@capacitor/app'
+
+    const HOME = 'https://waifu-math.vercel.app'
+    document.getElementById('btn-retry').addEventListener('click', async () => {
+      try {
+        const s = await Network.getStatus()
+        if (s.connected) location.replace(HOME)
+        else alert('Masih offline, cek WiFi/data ya 🌸')
+      } catch {
+        if (navigator.onLine) location.replace(HOME)
+        else alert('Masih offline')
+      }
+    })
+    document.getElementById('btn-exit').addEventListener('click', () => {
+      try { App.exitApp() } catch { close() }
+    })
+    // Auto balik jika koneksi kembali
+    try {
+      Network.addListener('networkStatusChange', s => {
+        if (s.connected) location.replace(HOME)
+      })
+    } catch {}
+    window.addEventListener('online', () => location.replace(HOME))
+  </script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
