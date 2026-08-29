@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Koleksi — Waifu Math Clash</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ===== Banner Card (list) ===== */
+    .banner-kol-card {
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--kartu, #fff);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      cursor: pointer;
+      transition: transform 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 150px;
+      position: relative;
+    }
+    .banner-kol-card:active { transform: scale(0.97); }
+
+    /* Strip kartu waifu di kiri, terpotong intentional */
+    .banner-strip {
+      display: flex;
+      gap: -8px;
+      height: 100%;
+      width: 60%;
+      flex-shrink: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .banner-strip-img {
+      height: 100%;
+      width: 40%;
+      flex-shrink: 0;
+      object-fit: cover;
+      object-position: top center;
+      margin-left: -8px;
+      filter: brightness(0.92);
+    }
+    .banner-strip-img:first-child { margin-left: 0; }
+
+    /* Gradient overlay dari strip ke konten */
+    .banner-strip::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, transparent 60%, var(--kartu, #fff) 100%);
+    }
+
+    /* Teks info di kanan */
+    .banner-info {
+      flex: 1;
+      padding: 0 1rem 0 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .banner-nama {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--teks);
+      line-height: 1.2;
+    }
+    .banner-badge-wrap {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .banner-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-epic   { background: rgba(168,85,247,0.15); color: var(--rarity-epic, #a855f7); }
+    .badge-rare   { background: rgba(59,130,246,0.15);  color: var(--rarity-rare, #3b82f6); }
+    .badge-common { background: rgba(107,114,128,0.12); color: #6b7280; }
+
+    /* Swipe kartu */
+    #swipe-wrap {
+      touch-action: pan-y;
+      user-select: none;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ===== VIEW 1: LIST BANNER DIMILIKI ===== -->
+  <div id="view-list">
+
+    <!-- Header -->
+    <div class="header-fix">
+      <h2 class="text-lg font-extrabold" style="color: var(--teks);">Koleksi Saya</h2>
+    </div>
+
+    <!-- Konten -->
+    <div class="konten-halaman ada-header scrollable px-4 pt-4 pb-4">
+      <div id="list-banner-kol" class="space-y-4">
+        <p class="text-center text-sm mt-8" style="color: var(--teks-sekunder);">Memuat koleksi...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW 2: DETAIL KOLEKSI BANNER ===== -->
+  <div id="view-detail" class="hidden">
+
+    <!-- Header -->
+    <div class="header-fix">
+      <div class="flex justify-between items-center">
+        <button id="btn-back" class="text-sm font-bold" style="color: var(--primary);">← Kembali</button>
+        <h2 id="detail-nama-banner" class="text-base font-extrabold" style="color: var(--teks);">Banner</h2>
+      </div>
+    </div>
+
+    <!-- Area kartu swipe -->
+    <div class="konten-halaman ada-header" style="bottom: 200px; overflow: hidden;">
+      <div id="swipe-wrap" class="flex flex-col items-center justify-center h-full px-4">
+        <div class="flex items-center gap-4 w-full justify-center">
+          <button id="btn-prev" class="text-2xl font-bold" style="color: var(--primary);">‹</button>
+          <div id="area-kartu" style="width: 400px; position: relative;">
+            <div class="card-waifu">
+              <img id="kartu-gambar" src="" alt="" class="card-gambar">
+              <img id="kartu-border" src="" alt="" class="card-border">
+            </div>
+          </div>
+          <button id="btn-next" class="text-2xl font-bold" style="color: var(--primary);">›</button>
+        </div>
+        <p id="kartu-nama" class="text-center font-extrabold text-lg mt-3" style="color: var(--teks);">-</p>
+        <div id="bintang-wrap" class="bintang-wrap justify-center mt-1"></div>
+        <p id="kartu-atk" class="text-sm font-semibold mt-1" style="color: var(--teks-sekunder);">ATK: -</p>
+        <p id="kartu-duplikat" class="text-sm" style="color: var(--teks-sekunder);">Duplikat: -</p>
+      </div>
+    </div>
+
+    <!-- Tombol aksi fix bawah -->
+    <div style="position: fixed; bottom: 60px; left: 0; right: 0; padding: 0.75rem 1.5rem; background: rgba(237,252,246,0.95); backdrop-filter: blur(8px); border-top: 1px solid #e5e5e5;">
+      <button id="btn-favorite" class="btn-outline mb-2"><img src="assets/ui/icon_star.svg" alt="star" style="width:1em;height:1em;vertical-align:middle;display:inline;"> Set Favorite</button>
+      <button id="btn-upgrade" class="btn-utama mb-1">⬆ Upgrade</button>
+      <p id="info-upgrade" class="text-center text-xs" style="color: var(--teks-sekunder);"></p>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation — 6 menu -->
+  <nav class="bottom-nav">
+    <a href="home.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="gacha.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Gacha
+    </a>
+    <a href="collection.html" class="aktif">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="9" rx="2"/><rect x="3" y="15" width="7" height="6" rx="2"/><rect x="14" y="15" width="7" height="6" rx="2"/></svg>
+      Koleksi
+    </a>
+    <a href="battle.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Battle
+    </a>
+    <a href="shop.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Shop
+    </a>
+    <a href="profil.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </a>
+  </nav>
+
+  <script type="module" src="js/collection.js"></script>
+</body>
+</html>

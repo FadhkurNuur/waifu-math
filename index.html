@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Waifu Math Clash</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ===== Hero Section ===== */
+    .hero-bg {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(160deg, #EDFCF6 0%, #d4f7ec 40%, #ffe0ea 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .logo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Placeholder logo — ganti <img> jika sudah ada aset */
+    .logo-icon {
+      width: 100px;
+      height: 100px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #3EC99E 0%, #FF7FA0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(62,201,158,0.35);
+    }
+    .logo-icon svg {
+      width: 56px;
+      height: 56px;
+      fill: #fff;
+    }
+
+    .logo-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #3EC99E, #FF7FA0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .logo-sub {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--teks-sekunder);
+    }
+
+    /* ===== 3 Tombol Hero ===== */
+    .hero-btns {
+      display: flex;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 320px;
+      padding: 0 1.5rem;
+    }
+    .hero-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 0.75rem 0.5rem;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .hero-btn:active { transform: scale(0.94); }
+    .hero-btn svg { width: 22px; height: 22px; }
+
+    .hero-btn-login {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(62,201,158,0.4);
+    }
+    .hero-btn-register {
+      background: var(--aksen);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(255,127,160,0.4);
+    }
+
+
+    /* ===== Drawer ===== */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0);
+      z-index: 200;
+      pointer-events: none;
+      transition: background 0.3s ease;
+    }
+    .drawer-overlay.aktif {
+      background: rgba(0,0,0,0.45);
+      pointer-events: all;
+    }
+
+    .drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      z-index: 300;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 0 1.5rem 1.5rem;
+      box-shadow: 0 -4px 32px rgba(0,0,0,0.12);
+    }
+    .drawer.aktif {
+      transform: translateY(0);
+    }
+
+    .drawer-handle {
+      width: 40px;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 99px;
+      margin: 12px auto 16px;
+      flex-shrink: 0;
+    }
+
+    .drawer-judul {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--teks);
+      text-align: center;
+      margin-bottom: 1rem;
+      flex-shrink: 0;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* ===== Notifikasi sukses register ===== */
+    .sukses-register {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 0.75rem;
+      text-align: center;
+    }
+    .sukses-register .icon-sukses {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #e8faf3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sukses-register .icon-sukses svg {
+      width: 30px;
+      height: 30px;
+      stroke: var(--primary);
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .sukses-register p {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--teks-sekunder);
+      line-height: 1.5;
+    }
+    .sukses-register strong {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Hero ===== -->
+  <div class="hero-bg">
+
+    <!-- Logo -->
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <!-- Ikon bintang/matematika — ganti img jika ada logo -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/>
+        </svg>
+      </div>
+      <span class="logo-title">Waifu Math Clash</span>
+      <span class="logo-sub">Jawab soal, serang waifu lawan!</span>
+    </div>
+
+    <!-- 3 Tombol -->
+    <div class="hero-btns">
+      <button class="hero-btn hero-btn-login" onclick="bukaDrawer('login')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Login
+      </button>
+      <button class="hero-btn hero-btn-register" onclick="bukaDrawer('register')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/>
+          <line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+        Register
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ===== Overlay ===== -->
+  <div class="drawer-overlay" id="overlay" onclick="tutupDrawer()"></div>
+
+  <!-- ===== Drawer ===== -->
+  <div class="drawer" id="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-judul" id="drawer-judul">Login</div>
+
+    <!-- Pesan error -->
+    <p id="pesan-error" class="teks-error mb-2 hidden text-center"></p>
+
+    <!-- Isi drawer berubah sesuai mode -->
+    <div class="drawer-body" id="drawer-body"></div>
+  </div>
+
+  <script type="module" src="js/auth.js"></script>
+
+  <script>
+    // ===== Template Drawer ===== //
+
+    const TEMPLATE = {
+      login: {
+        judul: 'Login',
+        html: `
+          <input id="input-email" type="email" class="input-field" placeholder="Email" autocomplete="email">
+          <input id="input-password" type="password" class="input-field" placeholder="Password" autocomplete="current-password">
+          <button id="btn-submit" class="btn-utama mt-auto" onclick="handleLogin()">Login</button>
+        `,
+      },
+      register: {
+        judul: 'Buat Akun',
+        html: `
+          <input id="input-username" type="text" class="input-field" placeholder="Username" autocomplete="username">
+          <input id="input-email" type="email" class="input-field" placeholder="Email" autocomplete="email">
+          <input id="input-password" type="password" class="input-field" placeholder="Password" autocomplete="new-password">
+          <button id="btn-submit" class="btn-aksen mt-auto" onclick="handleRegister()">Buat Akun</button>
+        `,
+      },
+    }
+
+    let modeAktif = null
+
+    function bukaDrawer(mode) {
+      modeAktif = mode
+      const t = TEMPLATE[mode]
+      document.getElementById('drawer-judul').textContent = t.judul
+      document.getElementById('drawer-body').innerHTML = t.html
+      document.getElementById('pesan-error').classList.add('hidden')
+      document.getElementById('overlay').classList.add('aktif')
+      document.getElementById('drawer').classList.add('aktif')
+    }
+
+    function tutupDrawer() {
+      document.getElementById('overlay').classList.remove('aktif')
+      document.getElementById('drawer').classList.remove('aktif')
+      modeAktif = null
+    }
+
+    function tampilError(pesan) {
+      const el = document.getElementById('pesan-error')
+      el.textContent = pesan
+      el.classList.remove('hidden')
+    }
+
+    function setBtnLoading(loading) {
+      const btn = document.getElementById('btn-submit')
+      if (!btn) return
+      btn.disabled = loading
+      if (loading) btn.textContent = 'Loading...'
+    }
+  </script>
+
+</body>
+</html>

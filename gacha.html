@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gacha — Waifu Math Clash</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ===== Banner Card (list) ===== */
+    .banner-card {
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--kartu, #fff);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      cursor: pointer;
+      transition: transform 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 150px;
+      position: relative;
+    }
+    .banner-card:active { transform: scale(0.97); }
+
+    /* Strip kartu waifu di kiri, terpotong intentional */
+    .banner-strip {
+      display: flex;
+      gap: -8px;
+      height: 100%;
+      width: 60%;
+      flex-shrink: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .banner-strip-img {
+      height: 100%;
+      width: 40%;
+      flex-shrink: 0;
+      object-fit: cover;
+      object-position: top center;
+      margin-left: -8px;
+      filter: brightness(0.92);
+    }
+    .banner-strip-img:first-child { margin-left: 0; }
+
+    /* Gradient overlay dari strip ke konten */
+    .banner-strip::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, transparent 60%, var(--kartu, #fff) 100%);
+    }
+
+    /* Teks info di kanan */
+    .banner-info {
+      flex: 1;
+      padding: 0 1rem 0 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .banner-nama {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--teks);
+      line-height: 1.2;
+    }
+    .banner-badge-wrap {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .banner-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-epic   { background: rgba(168,85,247,0.15); color: var(--rarity-epic, #a855f7); }
+    .badge-rare   { background: rgba(59,130,246,0.15);  color: var(--rarity-rare, #3b82f6); }
+    .badge-common { background: rgba(107,114,128,0.12); color: #6b7280; }
+
+    /* ===== Detail Banner: grid 2 kolom ===== */
+    .kartu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding-bottom: 5rem;
+    }
+    .kartu-grid-item {
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--kartu, #fff);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: default;
+    }
+    .kartu-grid-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      background: #eee;
+    }
+    .kartu-grid-img-placeholder {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+    .kartu-grid-border {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .kartu-grid-info {
+      text-align: center;
+      padding: 8px 10px 10px;
+    }
+    .kartu-grid-nama {
+      font-weight: 800;
+      font-size: 0.82rem;
+      color: var(--teks);
+      line-height: 1.3;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .kartu-grid-atk {
+      font-size: 0.72rem;
+      color: var(--teks-sekunder, #6b7280);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== VIEW 1: LIST BANNER ===== -->
+  <div id="view-list">
+
+    <!-- Header -->
+    <div class="header-fix">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-extrabold" style="color: var(--teks);">Gacha</h2>
+        <button id="btn-info-gacha" class="text-sm font-bold px-3 py-1 rounded-full" style="color: var(--primary); border: 1.5px solid var(--primary); background: #fff;">Info</button>
+      </div>
+    </div>
+
+    <!-- Konten list banner -->
+    <div class="konten-halaman ada-header scrollable px-4 pt-4 pb-4">
+      <div id="list-banner" class="space-y-4">
+        <p class="text-center text-sm mt-8" style="color: var(--teks-sekunder);">Memuat banner...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW 2: DETAIL BANNER ===== -->
+  <div id="view-detail" class="hidden">
+
+    <!-- Header -->
+    <div class="header-fix">
+      <div class="flex justify-between items-center">
+        <button id="btn-back" class="text-sm font-bold" style="color: var(--primary);">← Kembali</button>
+        <h2 id="detail-nama-banner" class="text-base font-extrabold" style="color: var(--teks);">Banner</h2>
+      </div>
+    </div>
+
+    <!-- List kartu dalam banner -->
+    <div class="konten-halaman ada-header scrollable px-4 pt-2" style="bottom: 120px; padding-bottom: 4rem;">
+      <div id="list-kartu-detail"></div>
+    </div>
+
+    <!-- Footer gacha informatif -->
+    <div style="position: fixed; bottom: 60px; left: 0; right: 0; padding: 0.6rem 1rem; background: var(--kartu, #fff); border-top: 1px solid rgba(0,0,0,0.07); backdrop-filter: blur(8px); display: flex; gap: 0.75rem; align-items: center;">
+      <!-- Info kiri (2/3): key silver + pity counters -->
+      <div style="flex: 2; display: flex; flex-direction: column; gap: 0.3rem;">
+        <!-- Row 1: Key Silver -->
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 0.8rem; color: var(--teks-sekunder);">Key Silver</span>
+          <span id="footer-key" style="font-size: 1rem; font-weight: 800; color: var(--teks);">0</span>
+        </div>
+        <!-- Row 2: Pity bars -->
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 0.3rem;">
+            <span style="font-size: 0.65rem; font-weight: 700; color: var(--rarity-rare, #3b82f6); text-transform: uppercase; letter-spacing: 0.04em;">Rare</span>
+            <span id="footer-pity-rare" style="font-size: 0.72rem; font-weight: 700; color: var(--rarity-rare, #3b82f6);">0/15</span>
+          </div>
+          <span style="font-size: 0.6rem; color: var(--teks-sekunder); opacity: 0.5;">·</span>
+          <div style="display: flex; align-items: center; gap: 0.3rem;">
+            <span style="font-size: 0.65rem; font-weight: 700; color: var(--rarity-epic, #a855f7); text-transform: uppercase; letter-spacing: 0.04em;">Epic</span>
+            <span id="footer-pity-epic" style="font-size: 0.72rem; font-weight: 700; color: var(--rarity-epic, #a855f7);">0/25</span>
+          </div>
+        </div>
+      </div>
+      <!-- Tombol gacha kanan (1/3) -->
+      <button id="btn-gacha" class="btn-utama" style="flex: 1; padding: 0.65rem 0.5rem; font-size: 0.85rem; white-space: nowrap;">GACHA! <img src="assets/ui/icon_key_silver.svg" alt="key" style="width:1em;height:1em;vertical-align:middle;display:inline;">−1</button>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation — 6 menu -->
+  <nav class="bottom-nav">
+    <a href="home.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="gacha.html" class="aktif">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Gacha
+    </a>
+    <a href="collection.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="9" rx="2"/><rect x="3" y="15" width="7" height="6" rx="2"/><rect x="14" y="15" width="7" height="6" rx="2"/></svg>
+      Koleksi
+    </a>
+    <a href="battle.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Battle
+    </a>
+    <a href="shop.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Shop
+    </a>
+    <a href="profil.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </a>
+  </nav>
+
+  <!-- Modal Info Silver & Pity -->
+  <div id="modal-info-gacha" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 class="modal-judul">Info Gacha</h3>
+      <div class="space-y-3 mb-4">
+        <div class="bg-white rounded-xl p-3 border-2" style="border-color: var(--primary);">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-sm font-bold" style="color: var(--teks);">Silver Key</span>
+            <span id="modal-silver" class="text-lg font-extrabold" style="color: var(--primary);">...</span>
+          </div>
+          <p class="text-xs" style="color: var(--teks-sekunder);">Untuk melakukan gacha</p>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-sm" style="color: var(--teks);">Pity Rare</span>
+            <span id="modal-pity-rare" class="font-bold" style="color: var(--rarity-rare);">0/15</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm" style="color: var(--teks);">Pity Epic</span>
+            <span id="modal-pity-epic" class="font-bold" style="color: var(--rarity-epic);">0/25</span>
+          </div>
+        </div>
+        <hr>
+        <div class="space-y-1 text-xs" style="color: var(--teks-sekunder);">
+          <p>• Common: 95%</p>
+          <p>• Rare: 4% (dijamin ke-15)</p>
+          <p>• Epic: 1% (dijamin ke-25)</p>
+        </div>
+      </div>
+      <button id="btn-tutup-info-gacha" class="btn-utama">Tutup</button>
+    </div>
+  </div>
+
+  <!-- Modal Reveal Gacha -->
+  <div id="modal-reveal" class="modal-overlay hidden" style="background: rgba(0,0,0,0.85);">
+    <div class="text-center w-full px-8">
+      <div id="reveal-wrap" class="gacha-reveal mx-auto mb-4" style="width: 200px; aspect-ratio: 3/4; border-radius: 16px; overflow: hidden; background: #333; position: relative;">
+        <img id="reveal-gambar" src="" alt="" style="width:100%; height:100%; object-fit:cover; display:block;">
+        <img id="reveal-border" src="" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:fill; pointer-events:none;">
+      </div>
+      <p id="reveal-nama" class="text-white text-xl font-extrabold mb-1">-</p>
+      <p id="reveal-rarity" class="text-sm font-bold mb-1">-</p>
+      <p id="reveal-atk" class="text-white text-sm mb-2">ATK: -</p>
+      <p id="reveal-label" class="text-lg font-extrabold mb-6">-</p>
+      <p class="text-white text-xs opacity-60">Tap mana saja untuk lanjut</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/gacha.js"></script>
+</body>
+</html>

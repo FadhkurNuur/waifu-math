@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Battle — Waifu Math Clash</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { overflow: hidden; background: #1a1a2e; }
+
+    /* Area waifu aktif — fullwidth proportional */
+    #area-waifu {
+      position: relative;
+      width: 100%;
+      height: 38vh;
+      overflow: hidden;
+      background: #2a2a3e;
+    }
+    #waifu-aktif-gambar {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+    }
+    #waifu-aktif-border {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      pointer-events: none;
+    }
+    #label-giliran {
+      position: absolute;
+      top: 8px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    /* Area info battle */
+    #area-info {
+      background: #fff;
+      padding: 0.75rem 1rem;
+    }
+    #nama-player { color: #3EC99E; }
+    #nama-lawan { color: #FF7FA0; }
+
+    /* Log battle */
+    #area-log {
+      flex: 1;
+      overflow-y: auto;
+      background: #f8fffe;
+      padding: 0.5rem 1rem;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+      display: flex;
+    }
+    .log-item {
+      font-size: 0.8rem;
+      color: var(--teks-sekunder);
+      padding: 2px 0;
+    }
+    .log-item.serangan { color: var(--aksen); font-weight: 600; }
+    .log-item.miss { color: #aaa; }
+
+    /* Area aksi bawah */
+    #area-aksi {
+      background: #fff;
+      padding: 0.75rem 1rem;
+      min-height: 100px;
+    }
+
+    /* Slot rarity kartu */
+    .slot-rarity {
+      flex: 1;
+      border-radius: 12px;
+      border: 2px solid #eee;
+      padding: 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s;
+      background: #fafafa;
+    }
+    .slot-rarity:active { transform: scale(0.96); }
+    .slot-rarity.aktif { border-color: var(--primary); background: #f0fff8; }
+    .slot-rarity.disabled { opacity: 0.4; cursor: not-allowed; }
+    .slot-gambar-mini {
+      width: 100%;
+      aspect-ratio: 3/4;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #eee;
+      margin-bottom: 4px;
+    }
+    .slot-gambar-mini img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Tombol jawaban */
+    .btn-jawab {
+      width: 100%;
+      padding: 0.6rem 0.5rem;
+      border-radius: 12px;
+      border: 2px solid var(--primary);
+      background: #fff;
+      color: var(--teks);
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-jawab:active { transform: scale(0.97); background: var(--bg); }
+    .btn-jawab.benar { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-jawab.salah { background: var(--aksen); color: #fff; border-color: var(--aksen); }
+  </style>
+</head>
+<body class="flex flex-col" style="height: 100vh;">
+  <script>
+    // Anti-flash: atur screen sebelum battle.js (async) selesai
+    (function(){
+      const hasId = new URLSearchParams(location.search).has('id');
+      function apply(){
+        const info = document.getElementById('screen-info');
+        const loading = document.getElementById('screen-loading');
+        const arena = document.getElementById('screen-arena');
+        if(!info||!loading||!arena) return setTimeout(apply, 5);
+        if(hasId){
+          info.classList.add('hidden'); loading.classList.remove('hidden'); arena.classList.add('hidden');
+          document.body.style.background='var(--bg)';
+        } else {
+          info.classList.remove('hidden'); loading.classList.add('hidden'); arena.classList.add('hidden');
+          document.body.style.background='var(--bg)';
+        }
+      }
+      if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', apply);
+      else apply();
+    })();
+  </script>
+
+  <!-- Screen 1: Info & Peraturan (tampil saat buka battle tanpa ?id) -->
+  <div id="screen-info" class="fixed inset-0 flex flex-col z-[500] hidden" style="background: var(--bg);">
+    <div class="flex-1 flex flex-col items-center justify-center px-6 py-8 overflow-y-auto">
+      <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl mb-4" style="background: var(--primary); color:#fff; box-shadow: 0 8px 24px rgba(62,201,158,0.3);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px;height:40px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <h1 class="text-2xl font-extrabold text-center" style="color: var(--teks);">Battle PvE</h1>
+
+      <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-md mb-6">
+        <h3 class="font-extrabold text-sm mb-3" style="color: var(--teks);">Peraturan:</h3>
+        <ul class="space-y-2 text-sm" style="color: var(--teks-sekunder);">
+          <li class="flex gap-2"><span>•</span><span>Pilih 1 dari 3 slot rarity (Common / Rare / Epic) — kartu <b>random</b> dari koleksimu sesuai rarity.</span></li>
+          <li class="flex gap-2"><span>•</span><span>Jawab soal matematika benar → damage = ATK kartu. Salah / timeout → giliran hangus.</span></li>
+          <li class="flex gap-2"><span>•</span><span>Waktu menjawab = ATK 1–20: 5 dtk, 21–40: 6 dtk, 41–60: 7 dtk, 61–80: 8 dtk, 81+: 10 dtk.</span></li>
+          <li class="flex gap-2"><span>•</span><span>Total HP = Rank × 100.</span></li>
+        </ul>
+      </div>
+
+      <button id="btn-cari-musuh" class="btn-utama w-full max-w-sm" style="padding: 1rem; font-size: 1.1rem;">
+        <span style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Cari Musuh
+        </span>
+      </button>
+      <a href="home.html" class="text-sm font-bold mt-4" style="color: var(--teks-sekunder);">← Kembali ke Home</a>
+    </div>
+  </div>
+
+  <!-- Screen 2: Loading Mencari Lawan -->
+  <div id="screen-loading" class="fixed inset-0 flex flex-col items-center justify-center z-[600] hidden" style="background: var(--bg);">
+    <div class="spinner" style="width: 56px; height: 56px; border-width: 5px;"></div>
+    <p class="font-extrabold text-lg mt-4" style="color: var(--primary);">Mencari lawan sesuai rank...</p>
+    <button id="btn-batal-cari" class="btn-outline mt-6" style="width:auto; padding:0.6rem 2.5rem; border-color: var(--aksen); color: var(--aksen);">Batal</button>
+  </div>
+  <!-- Fallback loading overlay lama (dipakai saat redirect) -->
+  <div id="loading-mencari" class="fixed inset-0 flex flex-col items-center justify-center z-[1000] hidden" style="background: var(--bg);">
+    <div class="spinner" style="width: 56px; height: 56px; border-width: 5px;"></div>
+    <p class="font-extrabold text-lg mt-4" style="color: var(--primary);">Mencari lawan sesuai rank...</p>
+  </div>
+
+  <!-- Screen 3: Arena Battle -->
+  <div id="screen-arena" class="flex flex-col flex-1 hidden" style="height: 100vh;">
+  <!-- Area waifu aktif -->
+  <div id="area-waifu">
+    <img id="waifu-aktif-gambar" src="" alt="">
+    <img id="waifu-aktif-border" src="" alt="">
+    <div id="label-giliran">Giliran: -</div>
+
+    <!-- Damage float container -->
+    <div id="damage-container" style="position: absolute; inset: 0; pointer-events: none;"></div>
+  </div>
+
+  <!-- Area info HP & timer — 2 kolom: kiri HP bar, kanan tombol Surrender -->
+  <div id="area-info" style="display: flex; gap: 0.75rem; align-items: center;">
+    <div style="flex: 1;">
+      <!-- HP lawan -->
+      <div class="mb-1">
+        <div class="flex justify-between items-center mb-1">
+          <span id="nama-lawan" class="text-xs font-bold" style="color: var(--teks-sekunder);">Lawan</span>
+          <span id="hp-lawan-teks" class="text-xs font-bold" style="color: var(--aksen);">HP: -</span>
+        </div>
+        <div class="hp-bar-wrap">
+          <div id="hp-lawan-bar" class="hp-bar-fill" style="width: 100%;"></div>
+        </div>
+      </div>
+      <!-- HP player -->
+      <div class="mb-1">
+        <div class="flex justify-between items-center mb-1">
+          <span id="nama-player" class="text-xs font-bold" style="color: var(--teks);">Kamu</span>
+          <span id="hp-player-teks" class="text-xs font-bold" style="color: var(--primary);">HP: -</span>
+        </div>
+        <div class="hp-bar-wrap">
+          <div id="hp-player-bar" class="hp-bar-fill" style="width: 100%;"></div>
+        </div>
+      </div>
+      <!-- Timer -->
+      <div id="wrap-timer" class="hidden mt-1">
+        <div class="timer-bar-wrap">
+          <div id="timer-bar" class="timer-bar-fill" style="width: 100%;"></div>
+        </div>
+        <p id="timer-teks" class="text-right text-xs font-bold mt-1" style="color: var(--aksen);">10 detik</p>
+      </div>
+    </div>
+    <button id="btn-surrender" style="flex-shrink:0; background: var(--aksen); color:#fff; border:none; border-radius:12px; padding:0.6rem 1rem; font-size:0.75rem; font-weight:800; cursor:pointer; box-shadow:0 2px 8px rgba(255,127,160,0.3); white-space:nowrap;">Surrender</button>
+  </div>
+
+  <!-- Log battle -->
+  <div id="area-log">
+    <div id="isi-log">
+      <p class="log-item">Battle dimulai!</p>
+    </div>
+  </div>
+
+  <!-- Area aksi bawah -->
+  <div id="area-aksi">
+
+    <!-- State: giliran player — pilih rarity -->
+    <div id="state-pilih-kartu" class="hidden">
+      <p class="text-xs font-bold mb-2 text-center" style="color: var(--teks-sekunder);">Pilih kartu untuk menyerang:</p>
+      <div class="flex gap-2" id="slot-rarity-wrap"></div>
+    </div>
+
+    <!-- State: soal matematika -->
+    <div id="state-soal" class="hidden">
+      <p id="teks-soal" class="text-center text-xl font-extrabold mb-3" style="color: var(--teks);">...</p>
+      <div id="opsi-jawaban" class="grid grid-cols-2 gap-2"></div>
+    </div>
+
+    <!-- State: giliran lawan -->
+    <div id="state-tunggu" class="hidden text-center py-2">
+      <p class="text-sm font-semibold" style="color: var(--teks-sekunder);">Menunggu lawan...</p>
+    </div>
+
+  </div>
+  </div><!-- end screen-arena -->
+
+  <!-- Modal Surrender Confirm -->
+  <div id="modal-surrender" class="modal-overlay hidden" style="z-index: 8500;">
+    <div class="modal-box text-center">
+      <div class="text-4xl mb-3">🏳️</div>
+      <h3 class="modal-judul">Menyerah?</h3>
+      <p class="text-sm mb-5" style="color: var(--teks-sekunder);">Kamu akan dianggap <b>kalah</b>. Yakin mau menyerah?</p>
+      <button id="btn-confirm-surrender" class="btn-utama mb-2" style="background: var(--aksen);">Ya, Menyerah</button>
+      <button id="btn-cancel-surrender" class="btn-outline">Batal</button>
+    </div>
+  </div>
+
+  <!-- Modal Hasil Battle -->
+  <div id="modal-hasil" class="modal-overlay hidden" style="z-index: 9000;">
+    <div class="modal-box text-center">
+      <div id="hasil-icon" class="text-5xl mb-3"><img src="assets/ui/icon_cup.svg" alt="trophy" style="width:1em;height:1em;vertical-align:middle;display:inline;"></div>
+      <h3 id="hasil-judul" class="modal-judul text-2xl">Kamu Menang!</h3>
+      <p id="hasil-desc" class="text-sm mb-5" style="color: var(--teks-sekunder);">+1 <img src="assets/ui/icon_key_silver.svg" alt="key" style="width:1em;height:1em;vertical-align:middle;display:inline;"> Key Silver</p>
+      <button id="btn-kembali" class="btn-utama">Kembali ke Menu</button>
+    </div>
+  </div>
+
+  <!-- Konfeti container -->
+  <div id="konfeti-container" style="position: fixed; inset: 0; pointer-events: none; z-index: 8999; overflow: hidden;"></div>
+
+  <script type="module" src="js/battle.js"></script>
+</body>
+</html>

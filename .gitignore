@@ -1,0 +1,76 @@
+# ===== Secrets & Certs =====
+# Jangan push sertifikat lokal HTTPS
+cert.pem
+key.pem
+*.pem
+*.key
+*.crt
+*.csr
+*.pfx
+
+# Env Supabase / API keys — wajib ignore jika pakai .env
+.env
+.env.*
+!.env.example
+.supabase/
+supabase/
+supabase/.temp/
+supabase/.branches/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.lnk
+
+# ===== Editor & IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/
+.claude/
+.opencode/
+
+# ===== Logs & Temp =====
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+tmp/
+temp/
+__pycache__/
+*.pyc
+
+# ===== Dependencies (proyek ini vanilla tanpa npm, tapi jaga-jaga) =====
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# ===== Vercel & Build =====
+.vercel/
+.vercel/*
+dist/
+build/
+out/
+.next/
+
+# ===== Supabase lokal (jika pakai CLI) =====
+.supabase_temp/
+
+# ===== Local dev server (tidak perlu di-push) =====
+serve-https.py
+serve-https.sh
+
+# ===== Docs internal (tidak perlu di-push ke public) =====
+AGENTS.md
+
+# ===== Cache =====
+.cache/
+.parcel-cache/
