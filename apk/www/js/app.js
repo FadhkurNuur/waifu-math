@@ -1,12 +1,43 @@
-// apk/www/js/app.js — paling powerful: offline, lock portrait, cegah back navigasi, double-back exit
-import { App } from '@capacitor/app'
-import { Network } from '@capacitor/network'
-import { ScreenOrientation } from '@capacitor/screen-orientation'
-import { StatusBar, Style } from '@capacitor/status-bar'
-import { SplashScreen } from '@capacitor/splash-screen'
-
+// apk/www/js/app.js — offline, portrait, fullscreen, double-back (tanpa bundler, pakai window.Capacitor)
 const OFFLINE_URL = './offline.html'
 const HOME_URL = 'https://waifu-math.vercel.app'
+
+// ===== Helper ambil plugin tanpa static import =====
+function getCapacitor() {
+  return window.Capacitor || {}
+}
+function getPlugin(name) {
+  try {
+    const cap = getCapacitor()
+    if (cap.Plugins && cap.Plugins[name]) return cap.Plugins[name]
+    // fallback Capacitor.Plugins alias
+    if (window[name]) return window[name]
+  } catch {}
+  return null
+}
+// Bungkus agar tidak crash jika plugin belum ready
+let AppPlugin = null
+let NetworkPlugin = null
+let ScreenOrientationPlugin = null
+let StatusBarPlugin = null
+let SplashScreenPlugin = null
+
+function refreshPlugins() {
+  const cap = getCapacitor()
+  AppPlugin = (cap.Plugins && cap.Plugins.App) || getPlugin('App')
+  NetworkPlugin = (cap.Plugins && cap.Plugins.Network) || getPlugin('Network')
+  ScreenOrientationPlugin = (cap.Plugins && cap.Plugins.ScreenOrientation) || getPlugin('ScreenOrientation')
+  StatusBarPlugin = (cap.Plugins && cap.Plugins.StatusBar) || getPlugin('StatusBar')
+  SplashScreenPlugin = (cap.Plugins && cap.Plugins.SplashScreen) || getPlugin('SplashScreen')
+  // juga coba global Capacitor untuk statusbar style enum
+  if (!StatusBarPlugin && cap.Plugins && cap.Plugins.StatusBar) StatusBarPlugin = cap.Plugins.StatusBar
+}
+refreshPlugins()
+// refresh lagi setelah bridge ready
+window.addEventListener('DOMContentLoaded', refreshPlugins)
+document.addEventListener('deviceready', refreshPlugins)
+setTimeout(refreshPlugins, 500)
+setTimeout(refreshPlugins, 1500)
 
 // ===== Toast =====
 let toastTimer = null
@@ -20,7 +51,7 @@ function showToast(msg) {
       background:rgba(46,58,53,0.92); color:#fff; padding:10px 18px;
       border-radius:999px; font-size:13px; font-weight:700; z-index:9999;
       max-width:80%; text-align:center; box-shadow:0 4px 16px rgba(0,0,0,0.2);
-      opacity:0; transition:opacity 0.2s;
+      opacity:0; transition:opacity 0.2s; pointer-events:none;
     `
     document.body.appendChild(el)
   }
@@ -30,15 +61,30 @@ function showToast(msg) {
   toastTimer = setTimeout(() => { el.style.opacity = '0' }, 2000)
 }
 
-// ===== Lock portrait sekuat mungkin =====
+// ===== Lock portrait + fullscreen hide status bar =====
 async function lockPortrait() {
+  refreshPlugins()
   try {
-    await ScreenOrientation.lock({ orientation: 'portrait' })
+    if (ScreenOrientationPlugin && ScreenOrientationPlugin.lock) {
+      await ScreenOrientationPlugin.lock({ orientation: 'portrait' })
+    }
   } catch {}
   try {
-    await StatusBar.setOverlaysWebView({ overlay: false })
-    await StatusBar.setStyle({ style: Style.Light })
-    await StatusBar.setBackgroundColor({ color: '#3EC99E' })
+    if (StatusBarPlugin && StatusBarPlugin.hide) {
+      await StatusBarPlugin.hide()
+    }
+    if (StatusBarPlugin && StatusBarPlugin.setOverlaysWebView) {
+      await StatusBarPlugin.setOverlaysWebView({ overlay: true })
+    }
+  } catch {}
+  try {
+    if (StatusBarPlugin && StatusBarPlugin.setStyle) {
+      // Style.Light = 'LIGHT'
+      await StatusBarPlugin.setStyle({ style: 'LIGHT' })
+    }
+  } catch {}
+  try {
+    document.documentElement.style.setProperty('--safe-top', '0px')
   } catch {}
 }
 
@@ -46,35 +92,46 @@ async function lockPortrait() {
 let isOfflinePage = location.pathname.endsWith('offline.html')
 
 async function cekOfflineAwal() {
+  refreshPlugins()
   try {
-    const status = await Network.getStatus()
-    if (!status.connected && !isOfflinePage) {
-      location.replace(OFFLINE_URL)
+    if (NetworkPlugin && NetworkPlugin.getStatus) {
+      const status = await NetworkPlugin.getStatus()
+      if (!status.connected && !isOfflinePage) {
+        location.replace(OFFLINE_URL)
+        return
+      }
+    } else {
+      throw new Error('no network plugin')
     }
   } catch {
-    // fallback navigator.onLine
     if (!navigator.onLine && !isOfflinePage) location.replace(OFFLINE_URL)
   }
 }
 
-// Listener network berubah
-try {
-  Network.addListener('networkStatusChange', status => {
-    if (!status.connected) {
-      if (!location.pathname.endsWith('offline.html')) {
-        showToast('Tidak ada internet 🌸')
-        setTimeout(() => location.replace(OFFLINE_URL), 600)
-      }
-    } else {
-      if (location.pathname.endsWith('offline.html')) {
-        showToast('Koneksi kembali ✓')
-        setTimeout(() => location.replace(HOME_URL), 400)
-      }
+// Listener network berubah — pakai plugin jika ada, fallback ke event browser
+function setupNetworkListener() {
+  refreshPlugins()
+  try {
+    if (NetworkPlugin && NetworkPlugin.addListener) {
+      NetworkPlugin.addListener('networkStatusChange', status => {
+        if (!status.connected) {
+          if (!location.pathname.endsWith('offline.html')) {
+            showToast('Tidak ada internet 🌸')
+            setTimeout(() => location.replace(OFFLINE_URL), 600)
+          }
+        } else {
+          if (location.pathname.endsWith('offline.html')) {
+            showToast('Koneksi kembali ✓')
+            setTimeout(() => location.replace(HOME_URL), 400)
+          }
+        }
+      })
     }
-  })
-} catch {}
+  } catch {}
+}
+setupNetworkListener()
 
-// Fallback untuk browser biasa (saat cap sync belum)
+// Fallback browser
 window.addEventListener('online', () => {
   if (location.pathname.endsWith('offline.html')) location.replace(HOME_URL)
 })
@@ -82,40 +139,70 @@ window.addEventListener('offline', () => {
   if (!location.pathname.endsWith('offline.html')) location.replace(OFFLINE_URL)
 })
 
-// ===== Back button: cegah navigasi, double-back exit =====
+// ===== Back button: double-back exit =====
+// Native MainActivity.java sudah handle double-back untuk remote site.
+// JS ini untuk offline.html & www/index.html fallback.
 let lastBack = 0
 const DOUBLE_BACK_MS = 2000
-
-try {
-  App.addListener('backButton', () => {
-    // SELALU cegah navigasi history WebView — hanya link/tombol di halaman yang boleh navigasi
-    // canGoBack kita abaikan, tidak ada window.history.back()
-
-    const now = Date.now()
-    // Jika sedang di offline.html dan online kembali, retry dulu jangan exit
-    if (location.pathname.endsWith('offline.html')) {
-      Network.getStatus().then(s => {
-        if (s.connected) location.replace(HOME_URL)
-        else showToast('Masih offline, tunggu koneksi ya')
-      }).catch(() => showToast('Masih offline'))
-      return
+function setupBack() {
+  refreshPlugins()
+  try {
+    if (AppPlugin && AppPlugin.addListener) {
+      AppPlugin.addListener('backButton', () => {
+        const now = Date.now()
+        if (location.pathname.endsWith('offline.html')) {
+          if (NetworkPlugin && NetworkPlugin.getStatus) {
+            NetworkPlugin.getStatus().then(s => {
+              if (s.connected) location.replace(HOME_URL)
+              else showToast('Masih offline, tunggu koneksi ya')
+            }).catch(() => {
+              if (navigator.onLine) location.replace(HOME_URL)
+              else showToast('Masih offline')
+            })
+          } else {
+            if (navigator.onLine) location.replace(HOME_URL)
+            else showToast('Masih offline')
+          }
+          return
+        }
+        if (now - lastBack < DOUBLE_BACK_MS) {
+          if (AppPlugin && AppPlugin.exitApp) AppPlugin.exitApp()
+          else window.close()
+        } else {
+          lastBack = now
+          showToast('Tekan sekali lagi untuk keluar ✨')
+        }
+      })
     }
-
-    if (now - lastBack < DOUBLE_BACK_MS) {
-      App.exitApp()
-    } else {
-      lastBack = now
-      showToast('Tekan sekali lagi untuk keluar ✨')
-    }
-  })
-} catch {}
+  } catch {}
+}
+setupBack()
+setTimeout(setupBack, 800)
+setTimeout(setupBack, 2000)
 
 // ===== Init =====
 lockPortrait()
 cekOfflineAwal()
-SplashScreen.hide().catch(() => {})
+try {
+  refreshPlugins()
+  if (SplashScreenPlugin && SplashScreenPlugin.hide) SplashScreenPlugin.hide().catch(() => {})
+} catch {}
+try {
+  // status bar hide lagi setelah splash
+  setTimeout(lockPortrait, 800)
+} catch {}
 
 // Re-lock saat resume
 try {
-  App.addListener('resume', () => lockPortrait())
+  refreshPlugins()
+  if (AppPlugin && AppPlugin.addListener) {
+    AppPlugin.addListener('resume', () => lockPortrait())
+  } else {
+    document.addEventListener('resume', lockPortrait)
+  }
 } catch {}
+// Re-hide saat visibility change (balik dari recent apps)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) lockPortrait()
+})
+window.addEventListener('focus', lockPortrait)

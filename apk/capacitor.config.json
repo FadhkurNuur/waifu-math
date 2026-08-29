@@ -20,7 +20,8 @@
     },
     "StatusBar": {
       "style": "LIGHT",
-      "backgroundColor": "#3EC99E"
+      "backgroundColor": "#3EC99E",
+      "overlaysWebView": true
     },
     "ScreenOrientation": {
       "orientation": "portrait"

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Game Raid — Waifu Math Clash</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: var(--bg); }
+  </style>
+</head>
+<body class="flex flex-col" style="min-height:100vh;">
+
+  <!-- Header -->
+  <div class="header-fix" style="display:flex; justify-content:space-between; align-items:center;">
+    <a href="minigame.html" style="color: var(--primary); font-weight: 800; font-size: 0.9rem; text-decoration:none;">← Minigame</a>
+    <h2 class="text-base font-extrabold" style="color: var(--teks);">Game Raid</h2>
+    <span style="width: 70px;"></span>
+  </div>
+
+  <div class="konten-halaman ada-header scrollable flex flex-col items-center justify-center px-6 py-8" style="bottom:60px;">
+    <div class="w-24 h-24 rounded-3xl flex items-center justify-center mb-4" style="background: var(--aksen); color:#fff; box-shadow: 0 8px 24px rgba(255,127,160,0.3);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:44px;height:44px;"><path d="M12 2l7 4v6c0 5-3.5 7.5-7 8-3.5-.5-7-3-7-8V6l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+    </div>
+    <h1 class="text-2xl font-extrabold text-center" style="color: var(--teks);">Game Raid</h1>
+    <p class="text-sm font-bold mt-1 px-3 py-1 rounded-full" style="background: #fff; color: var(--aksen); border: 1.5px solid var(--aksen);">Segera Hadir</p>
+
+    <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-md mt-6 text-left">
+      <h3 class="font-extrabold text-sm mb-3" style="color: var(--teks);">Konsep Raid:</h3>
+      <ul class="space-y-2 text-sm" style="color: var(--teks-sekunder);">
+        <li class="flex gap-2"><span>•</span><span>Lawan boss dengan HP besar — butuh banyak jawaban benar beruntun.</span></li>
+        <li class="flex gap-2"><span>•</span><span>Reward: Key Gold / Key Silver lebih besar dari Casual.</span></li>
+        <li class="flex gap-2"><span>•</span><span>Bisa co-op dengan teman (rencana).</span></li>
+        <li class="flex gap-2"><span>•</span><span>Tetap pakai deck waifu Koleksi kamu.</span></li>
+      </ul>
+    </div>
+
+    <button onclick="location.href='minigame.html'" class="btn-outline mt-6 w-full max-w-sm">← Kembali ke Minigame</button>
+    <a href="game-casual.html" class="btn-utama mt-3 w-full max-w-sm text-center" style="display:block; text-decoration:none; line-height:1.5; padding:0.75rem;">Main Game Casual dulu →</a>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="home.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="gacha.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Gacha
+    </a>
+    <a href="collection.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="9" rx="2"/><rect x="3" y="15" width="7" height="6" rx="2"/><rect x="14" y="15" width="7" height="6" rx="2"/></svg>
+      Koleksi
+    </a>
+    <a href="minigame.html" class="aktif">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M6 12h4"/><path d="M8 10v4"/><circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="17" cy="13" r="1" fill="currentColor" stroke="none"/></svg>
+      Minigame
+    </a>
+    <a href="shop.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Shop
+    </a>
+    <a href="profil.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </a>
+  </nav>
+
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Minigame — Waifu Math Clash</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ===== Card Game di hub ===== */
+    .game-card {
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+    .game-card:active { transform: scale(0.97); }
+    .game-card.soon {
+      opacity: 0.9;
+      cursor: default;
+    }
+    .game-card.soon:active { transform: none; }
+    .game-thumb {
+      height: 140px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .game-thumb-casual {
+      background: linear-gradient(135deg, #3EC99E 0%, #2abf8a 50%, #1ea882 100%);
+    }
+    .game-thumb-raid {
+      background: linear-gradient(135deg, #FF7FA0 0%, #ff6b9e 50%, #e85d8a 100%);
+    }
+    .game-thumb-locked {
+      background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+    }
+    .game-thumb-icon {
+      width: 72px;
+      height: 72px;
+      background: rgba(255,255,255,0.22);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .game-thumb-icon svg { width: 36px; height: 36px; stroke: #fff; }
+    .game-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .badge-ready { background: #fff; color: var(--primary); }
+    .badge-soon { background: rgba(0,0,0,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.4); }
+    .badge-locked { background: #9ca3af; color: #fff; }
+    .game-info {
+      padding: 0.9rem 1rem 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .game-nama {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--teks);
+      line-height: 1.2;
+    }
+    .game-deskripsi {
+      font-size: 0.78rem;
+      color: var(--teks-sekunder);
+      line-height: 1.4;
+      flex: 1;
+    }
+    .game-meta {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-top: 0.2rem;
+    }
+    .game-tag {
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: var(--teks-sekunder);
+    }
+    .btn-main {
+      margin-top: 0.6rem;
+      width: 100%;
+      padding: 0.65rem;
+      border-radius: 12px;
+      border: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.12s;
+    }
+    .btn-main:active { transform: scale(0.97); }
+    .btn-casual { background: var(--primary); color: #fff; }
+    .btn-raid { background: var(--aksen); color: #fff; }
+    .btn-locked { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header-fix">
+    <div class="flex justify-between items-center">
+      <h2 class="text-lg font-extrabold" style="color: var(--teks);">Minigame</h2>
+      <span class="text-xs font-bold px-3 py-1 rounded-full" style="background: var(--primary); color:#fff;">2 Game</span>
+    </div>
+  </div>
+
+  <!-- Konten -->
+  <div class="konten-halaman ada-header scrollable px-4 pt-4 pb-4">
+    <p class="text-xs font-semibold mb-3" style="color: var(--teks-sekunder);">Pilih mode permainan — semua soal tetap pakai waifu koleksimu!</p>
+
+    <div class="grid grid-cols-1 gap-4">
+
+      <!-- Card: Game Casual (aktif) -->
+      <a href="game-casual.html" style="text-decoration: none;">
+        <div class="game-card">
+          <div class="game-thumb game-thumb-casual">
+            <div class="game-thumb-icon">
+              <!-- icon pedang / battle -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <span class="game-badge badge-ready">Tersedia</span>
+          </div>
+          <div class="game-info">
+            <p class="game-nama">Game Casual</p>
+            <p class="game-deskripsi">Battle PvE 1vs1 — pilih slot rarity, jawab soal matematika, berikan damage = ATK kartu. HP = Rank × 100.</p>
+            <div class="game-meta">
+              <span class="game-tag">PvE</span>
+              <span class="game-tag">1 vs Bot</span>
+              <span class="game-tag">+1 <img src="assets/ui/icon_key_silver.svg" alt="key" style="width:1em;height:1em;vertical-align:middle;display:inline;"> / menang</span>
+            </div>
+            <button class="btn-main btn-casual" onclick="event.preventDefault(); location.href='game-casual.html'">Main Sekarang →</button>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card: Game Raid (soon) -->
+      <a href="game-raid.html" style="text-decoration: none;">
+        <div class="game-card">
+          <div class="game-thumb game-thumb-raid">
+            <div class="game-thumb-icon">
+              <!-- icon boss / raid -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 4v6c0 5-3.5 7.5-7 8-3.5-.5-7-3-7-8V6l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <span class="game-badge badge-soon">Segera</span>
+          </div>
+          <div class="game-info">
+            <p class="game-nama">Game Raid</p>
+            <p class="game-deskripsi">Lawan boss raksasa bersama — butuh kerjasama & combo jawaban benar beruntun. Reward lebih besar!</p>
+            <div class="game-meta">
+              <span class="game-tag">Co-op</span>
+              <span class="game-tag">Boss</span>
+              <span class="game-tag">Coming Soon</span>
+            </div>
+            <button class="btn-main btn-raid" onclick="event.preventDefault(); location.href='game-raid.html'">Lihat Detail →</button>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card placeholder future (opsional, bisa tambah nanti) -->
+      <div class="game-card soon">
+        <div class="game-thumb game-thumb-locked">
+          <div class="game-thumb-icon" style="background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.08);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <span class="game-badge badge-locked">Terkunci</span>
+        </div>
+        <div class="game-info">
+          <p class="game-nama" style="color:#9ca3af;">Game Lainnya</p>
+          <p class="game-deskripsi">Mode baru akan hadir — pantau update di sini!</p>
+          <button class="btn-main btn-locked" disabled>Segera Hadir</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Navigation — 6 menu, Minigame aktif -->
+  <nav class="bottom-nav">
+    <a href="home.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="gacha.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Gacha
+    </a>
+    <a href="collection.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="9" rx="2"/><rect x="3" y="15" width="7" height="6" rx="2"/><rect x="14" y="15" width="7" height="6" rx="2"/></svg>
+      Koleksi
+    </a>
+    <a href="minigame.html" class="aktif">
+      <!-- icon joystick / gamepad -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M6 12h4"/><path d="M8 10v4"/><circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="17" cy="13" r="1" fill="currentColor" stroke="none"/></svg>
+      Minigame
+    </a>
+    <a href="shop.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Shop
+    </a>
+    <a href="profil.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </a>
+  </nav>
+
+</body>
+</html>
