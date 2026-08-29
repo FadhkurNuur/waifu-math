@@ -201,6 +201,89 @@ export function clearCache(key) {
   try { localStorage.removeItem(key) } catch {}
 }
 
+// ===== Number Pad Koma-only (reuse untuk game-class) =====
+// Pakai: createNumberPad(containerEl, { onSubmit, onChange, maxLen:10 })
+// Container akan diisi: display + grid 3x4 (7 8 9 / 4 5 6 / 1 2 3 / , 0 ⌫) + tombol Kirim
+// Display readonly, tidak trigger keyboard sistem. Support koma satu saja, normalisasi koma→titik saat compare.
+export function createNumberPad(containerEl, opts = {}) {
+  const maxLen = opts.maxLen || 10
+  let value = '' // string dengan koma, ex: "1,5"
+  const onSubmit = opts.onSubmit || (()=>{})
+  const onChange = opts.onChange || (()=>{})
+
+  containerEl.innerHTML = `
+    <div class="numpad-display input-field text-center font-extrabold" style="font-size:1.4rem; letter-spacing:0.04em; min-height:48px; display:flex; align-items:center; justify-content:center; background:#fff;"></div>
+    <div class="numpad-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:8px;"></div>
+    <button class="btn-utama numpad-kirim" style="margin-top:8px;">Kirim Jawaban</button>
+  `
+  const display = containerEl.querySelector('.numpad-display')
+  const grid = containerEl.querySelector('.numpad-grid')
+  const btnKirim = containerEl.querySelector('.numpad-kirim')
+
+  function renderDisplay() {
+    display.textContent = value || '—'
+    display.style.color = value ? 'var(--teks)' : 'var(--teks-sekunder)'
+    onChange(value)
+  }
+  function inputKey(k) {
+    if (k === 'del') {
+      value = value.slice(0, -1)
+    } else if (k === ',') {
+      if (value.includes(',')) return
+      if (value === '' || value === '-') value += '0,'
+      else value += ','
+    } else if (k === '-') {
+      if (value.startsWith('-')) value = value.slice(1)
+      else value = '-' + value
+    } else {
+      // digit
+      if (value.replace('-','').replace(',','').length >= maxLen) return
+      // hindari leading 0 ganda
+      if (value === '0' && k === '0') return
+      if (value === '0' && k !== ',') value = k
+      else value += k
+    }
+    renderDisplay()
+  }
+  const keys = ['7','8','9','4','5','6','1','2','3',',','0','del']
+  keys.forEach(k=>{
+    const b=document.createElement('button')
+    b.type='button'
+    b.className='numpad-btn'
+    b.style.cssText='padding:0.75rem 0; border-radius:12px; border:2px solid #e8ecef; background:#fff; font-family:Nunito,sans-serif; font-size:1.1rem; font-weight:800; color:var(--teks); cursor:pointer; transition: transform 0.08s, background 0.12s;'
+    if(k==='del'){ b.textContent='⌫'; b.style.color='var(--aksen)'; b.style.borderColor='var(--aksen)'; }
+    else if(k===','){ b.textContent=','; }
+    else { b.textContent=k; }
+    b.addEventListener('click', ()=> inputKey(k))
+    b.addEventListener('touchstart', ()=> b.style.transform='scale(0.96)', {passive:true})
+    b.addEventListener('touchend', ()=> b.style.transform='', {passive:true})
+    grid.appendChild(b)
+  })
+  // tombol minus kecil di bawah grid jika perlu negatif (opsional, tampil selalu)
+  const minusBtn=document.createElement('button')
+  minusBtn.type='button'
+  minusBtn.textContent='±'
+  minusBtn.title='Minus'
+  minusBtn.style.cssText='position:absolute; top:6px; right:8px; width:28px; height:28px; border-radius:50%; border:1.5px solid var(--teks-sekunder); background:#fff; color:var(--teks-sekunder); font-weight:800; font-size:0.8rem; cursor:pointer;'
+  minusBtn.onclick=()=> inputKey('-')
+  containerEl.style.position='relative'
+  containerEl.appendChild(minusBtn)
+
+  btnKirim.onclick=()=> {
+    const trimmed = value.trim()
+    if(!trimmed || trimmed==='-' || trimmed===',') { showToast('Isi jawaban dulu'); return }
+    onSubmit(trimmed)
+  }
+  renderDisplay()
+  return {
+    getValue: ()=> value,
+    setValue: (v)=> { value = String(v||''); renderDisplay() },
+    clear: ()=> { value=''; renderDisplay() },
+    focus: ()=> {},
+    destroy: ()=> { containerEl.innerHTML='' }
+  }
+}
+
 // Pre-cache gambar ke CacheStorage agar kunjungan berikutnya tidak fetch ulang
 // Dipanggil otomatis oleh lazy loader, tapi bisa juga manual
 export async function preCacheImages(urls) {

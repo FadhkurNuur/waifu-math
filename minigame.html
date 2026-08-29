@@ -125,7 +125,7 @@
   <div class="header-fix">
     <div class="flex justify-between items-center">
       <h2 class="text-lg font-extrabold" style="color: var(--teks);">Minigame</h2>
-      <span class="text-xs font-bold px-3 py-1 rounded-full" style="background: var(--primary); color:#fff;">3 Game</span>
+      <span class="text-xs font-bold px-3 py-1 rounded-full" style="background: var(--primary); color:#fff;">4 Game</span>
     </div>
   </div>
 
@@ -158,9 +158,9 @@
         </div>
       </a>
 
-      <!-- Card: Endless (NEW - 1x/hari) -->
+      <!-- Card: Endless (1x/hari) -->
       <a href="game-endless.html" style="text-decoration: none;">
-        <div class="game-card" style="border: 1.5px solid var(--primary);">
+        <div class="game-card">
           <div class="game-thumb" style="background: linear-gradient(135deg,#FF7FA0 0%, #3EC99E 100%);">
             <div class="game-thumb-icon">
               <!-- icon infinity -->
@@ -170,7 +170,7 @@
           </div>
           <div class="game-info">
             <p class="game-nama">Endless Mode ∞</p>
-            <p class="game-deskripsi">Unlimited round sampai salah pertama! Boss HP ∞, farming damage. 1 Key / 200 dmg, max 10/hari (cap 2000 dmg). Butuh 3 rarity!</p>
+            <p class="game-deskripsi">Unlimited round sampai salah pertama! Boss HP ∞, farming damage. 1 Key / 200 dmg, max 10/hari.</p>
             <div class="game-meta">
               <span class="game-tag">∞ Round</span>
               <span class="game-tag">1x/hari</span>
@@ -200,6 +200,29 @@
               <span class="game-tag">Coming Soon</span>
             </div>
             <button class="btn-main btn-raid" onclick="event.preventDefault(); location.href='game-raid.html'">Lihat Detail →</button>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card: Kelas (Baru, Pure Math) -->
+      <a href="game-class.html" style="text-decoration: none;">
+        <div class="game-card" style="border: 1.5px solid var(--primary);">
+          <div class="game-thumb" style="background: linear-gradient(135deg,#A78BFA 0%, #3EC99E 100%);">
+            <div class="game-thumb-icon">
+              <!-- icon kelas / book -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M8 7h8"/><path d="M8 11h8"/></svg>
+            </div>
+            <span class="game-badge badge-ready">Belajar</span>
+          </div>
+          <div class="game-info">
+            <p class="game-nama">Kelas</p>
+            <p class="game-deskripsi">Pure matematika — pilih materi, kerjakan urut pakai numpad koma, 5 frag = 1 Key. Salah bisa ulang (no frag) sampai benar.</p>
+            <div class="game-meta">
+              <span class="game-tag">No Timer</span>
+              <span class="game-tag">Numpad</span>
+              <span class="game-tag">5 frag → 1 <img src="assets/ui/icon_key_silver.svg" style="width:1em;height:1em;vertical-align:middle;display:inline;"></span>
+            </div>
+            <button class="btn-main" style="background: linear-gradient(135deg,#A78BFA,#3EC99E); color:#fff;" onclick="event.preventDefault(); location.href='game-class.html'">Buka Kelas →</button>
           </div>
         </div>
       </a>

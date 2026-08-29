@@ -75,6 +75,11 @@ AGENTS.md
 .cache/
 .parcel-cache/
 
+# ===== Git push helper (lokal saja, jangan push) =====
+push-commands.txt
+git-push.txt
+*push-commands*.txt
+
 # ===== Capacitor APK build (folder apk/ tetap dipush, tapi build output di-ignore) =====
 apk/node_modules/
 apk/android/
