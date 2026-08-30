@@ -34,10 +34,6 @@ function applyBoss(){
   img.style.display='block'; if(fall) fall.style.display='none'
   img.src=getBossSrc()
   img.onerror=()=>{ img.style.display='none'; if(fall) fall.style.display='block' }
-  const nama=document.getElementById('boss-nama-raid')
-  if(nama && season) nama.textContent=`BOSS WEEK ${season.week_start}`
-  const label=document.getElementById('label-week')
-  if(label && season) label.textContent=`Week ${season.week_start} • ${season.status}`
 }
 
 async function init(){
@@ -72,13 +68,19 @@ async function muatSeasonInfo(){
   season=data.season
   myDamage=data.myTotal||0
   const pct= season.boss_max ? Math.max(0, (season.boss_hp/season.boss_max)*100) : 0
-  document.getElementById('info-boss-hp').textContent=`${season.boss_hp}/${season.boss_max}`
-  document.getElementById('info-boss-bar').style.width=`${pct}%`
-  document.getElementById('week-label').textContent=`Week ${season.week_start} • ${season.status}`
-  document.getElementById('txt-boss-hp').textContent=`${season.boss_hp}/${season.boss_max}`
-  document.getElementById('bar-boss').style.width=`${pct}%`
-  document.getElementById('txt-my-damage').textContent=String(myDamage)
+  const infoHp=document.getElementById('info-boss-hp')
+  if(infoHp) infoHp.textContent=`${season.boss_hp}/${season.boss_max}`
+  const infoBar=document.getElementById('info-boss-bar')
+  if(infoBar) infoBar.style.width=`${pct}%`
+  const txtHp=document.getElementById('txt-boss-hp')
+  if(txtHp) txtHp.textContent=`${season.boss_hp}/${season.boss_max}`
+  const barBoss=document.getElementById('bar-boss')
+  if(barBoss) barBoss.style.width=`${pct}%`
+  const txtMy=document.getElementById('txt-my-damage')
+  if(txtMy) txtMy.textContent=String(myDamage)
   applyBoss()
+  // cap info
+  const capInfo=document.getElementById('info-status')
   // leaderboard
   const lb=document.getElementById('leaderboard')
   lb.innerHTML=''
@@ -103,19 +105,42 @@ async function muatSeasonInfo(){
     const r=data.myReward
     myRankEl.textContent+=` • Hadiah: ${r.reward_gold? r.reward_gold+' Gold' : r.reward_silver+' Silver'} (Rank #${r.rank})`
   }
-  document.getElementById('info-status').textContent = season.status==='finished' ? 'Boss sudah kalah minggu ini — hadiah sudah dibagikan. Tunggu Senin 00:00 WIB reset.' : `Boss HP ${season.boss_hp} — serang bersama!`
+  // cap harian
+  const used=data.usedToday||0
+  const sisa=data.sisaHari ?? Math.max(0,5-used)
+  if(data.cap_harian){
+    if(capInfo) capInfo.textContent=`Cap harian 5 serang tercapai (${used}/5) — kembali besok 00:00 WIB`
+    const btn=document.getElementById('btn-serang')
+    if(btn){ btn.textContent='Cap Harian Tercapai (5/5)'; btn.disabled=true; btn.style.opacity='0.6' }
+    // juga tampil di arena log
+    const logRaid=document.getElementById('log-raid')
+    if(logRaid) logRaid.textContent=`Cap 5 serang/hari tercapai — sisa ${sisa} besok`
+  } else {
+    if(capInfo) capInfo.textContent = season.status==='finished' ? 'Boss sudah kalah minggu ini — hadiah sudah dibagikan. Tunggu Senin 00:00 WIB reset.' : `Boss HP ${season.boss_hp} — serang bersama! Sisa hari ini: ${sisa}/5`
+  }
   if(season.status==='finished'){
-    document.getElementById('btn-serang').textContent='Lihat Hasil'
-    document.getElementById('btn-serang').disabled=true
-    document.getElementById('btn-serang').style.opacity='0.6'
+    const btn=document.getElementById('btn-serang')
+    if(btn){ btn.textContent='Lihat Hasil'; btn.disabled=true; btn.style.opacity='0.6' }
+  } else if(!data.cap_harian){
+    const btn=document.getElementById('btn-serang')
+    if(btn){ btn.textContent='Masuk Arena →'; btn.disabled=false; btn.style.opacity='1' }
   }
   sudahSelesai = season.status==='finished'
+  // simpan cap untuk cek di arena (jangan gabung ke sudahSelesai)
+  season._usedToday=used
+  season._sisaHari=sisa
+  season._cap_harian=!!data.cap_harian
+  // jika cap, disable tombol tapi jangan anggap finished (boss masih hidup)
+  if(data.cap_harian){
+    // sudah handle di atas (btn disabled), tapi izinkan lihat leaderboard
+  }
 }
 
 function wire(){
   document.getElementById('btn-serang')?.addEventListener('click', ()=>{
     if(!season) return
     if(season.status==='finished'){ showToast('Boss sudah kalah — hadiah sudah dibagikan'); return }
+    if(season._cap_harian){ showToast('Cap 5 serang/hari tercapai — kembali besok'); return }
     showScreen('arena')
     applyBoss()
     mulaiRonde()
@@ -241,7 +266,28 @@ async function jawab(opsiDipilih, jawabanBenar, btnEl){
   if(sudahSelesai){ showToast('Boss sudah kalah'); tampilState('pilih'); return }
   const damage=benar ? (kartuTerpilih._atk||kartuTerpilih.current_atk||0) : 0
   const {data, error}=await supabase.functions.invoke('serang-raid',{body:{season_id: season.id, card_id: kartuTerpilih.card_id||kartuTerpilih.id, rarity_slot: kartuTerpilih.rarity, benar, damage}})
-  if(error){ showToast('Gagal serang'); tampilState('pilih'); return }
+  if(error){
+    const msg=String(error.message||'')
+    // cek cap dari error body jika ada
+    // @ts-ignore supabase-js error context
+    const ctx=(error as any)?.context
+    if(msg.includes('Cap harian') || (data as any)?.cap_harian){
+      showToast('Cap 5 serang/hari tercapai')
+      season._cap_harian=true
+      document.getElementById('log-raid').textContent='Cap harian tercapai — kembali besok'
+      tampilState('pilih')
+      return
+    }
+    showToast('Gagal serang'); tampilState('pilih'); return
+  }
+  // handle cap dari response 429 yang di-wrap sebagai error=false tapi data.cap_harian
+  if((data as any)?.error && (data as any)?.cap_harian){
+    showToast('Cap 5 serang/hari tercapai')
+    season._cap_harian=true
+    document.getElementById('log-raid').textContent='Cap harian tercapai'
+    tampilState('pilih')
+    return
+  }
   if(benar){
     myDamage+=damage
     document.getElementById('txt-my-damage').textContent=String(myDamage)
