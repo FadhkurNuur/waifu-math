@@ -222,11 +222,19 @@ function renderSlot(){
 
 function mulaiRonde(){
   if(sudahSelesai) return
+  if(season && season._cap_harian){
+    showCapModal()
+    return
+  }
   tampilState('pilih')
   renderSlot()
 }
 
 async function pilihKartu(rarity){
+  if(season && season._cap_harian){
+    showCapModal()
+    return
+  }
   const pick=slotPreview[rarity] || (kartuPool[rarity]||[])[0]
   if(!pick) return
   kartuTerpilih=pick
@@ -278,17 +286,32 @@ async function jawab(opsiDipilih, jawabanBenar, btnEl){
   const damage=benar ? (kartuTerpilih._atk||kartuTerpilih.current_atk||0) : 0
   const {data, error}=await supabase.functions.invoke('serang-raid',{body:{season_id: season.id, card_id: kartuTerpilih.card_id||kartuTerpilih.id, rarity_slot: kartuTerpilih.rarity, benar, damage}})
   if(error){
+    let isCap = false
+    try {
+      const errStr = JSON.stringify(error) + ' ' + String(error.message||'') + ' ' + String(error.context||'')
+      if(errStr.includes('Cap harian') || errStr.includes('cap_harian') || errStr.includes('Cap Harian')) isCap = true
+    } catch {}
     const msg=String(error.message||'')
+    if(msg.includes('Cap harian')) isCap = true
     const capData = data && data.cap_harian
-    if(msg.includes('Cap harian') || capData){
+    if(capData) isCap = true
+    try {
+      const ctx = error.context
+      if(ctx){
+        const body = typeof ctx === 'string' ? ctx : JSON.stringify(ctx)
+        if(body.includes('cap_harian') || body.includes('Cap harian')) isCap = true
+        try { const j = typeof ctx === 'string' ? JSON.parse(ctx) : ctx; if(j && j.cap_harian) isCap = true } catch {}
+      }
+    } catch {}
+    if(isCap){
       season._cap_harian=true
+      if(typeof season._usedToday === 'number') season._usedToday = 5
       showCapModal()
       tampilState('pilih')
       return
     }
     showToast('Gagal serang'); tampilState('pilih'); return
   }
-  // handle cap dari response 429 yang di-wrap sebagai error=false tapi data.cap_harian
   if(data && data.error && data.cap_harian){
     season._cap_harian=true
     showCapModal()
@@ -300,6 +323,13 @@ async function jawab(opsiDipilih, jawabanBenar, btnEl){
     document.getElementById('txt-my-damage').textContent=String(myDamage)
     tampilDamage(damage)
     tambahLog(`Serang +${damage} dmg (total ${myDamage}) • Boss ${data.boss_hp}/${data.boss_max}`)
+    // update cap counter lokal (5/hari WIB)
+    season._usedToday = (season._usedToday||0) + 1
+    if(season._usedToday >= 5){
+      season._cap_harian = true
+      // beri hint, modal akan muncul di serangan berikutnya (ke-6)
+      document.getElementById('log-raid').textContent = `Sisa hari ini: 0/5 — cap tercapai setelah ini`
+    }
   } else {
     tambahLog(`Salah — tidak ada damage`)
   }

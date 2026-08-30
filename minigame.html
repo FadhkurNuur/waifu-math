@@ -18,7 +18,9 @@
       cursor: pointer;
       transition: transform 0.15s, box-shadow 0.15s;
       position: relative;
+      border: 1.5px solid #eef2f7;
     }
+    .game-card.soon { border-color: #e5e7eb; }
     .game-card:active { transform: scale(0.97); }
     .game-card.soon {
       opacity: 0.9;
@@ -117,6 +119,12 @@
     .btn-casual { background: var(--primary); color: #fff; }
     .btn-raid { background: var(--aksen); color: #fff; }
     .btn-locked { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+    /* ===== Tabs Waifu / Pure MTK ===== */
+    .tab-wrap { position: fixed; top: 50px; left: 0; right: 0; z-index: 90; background: rgba(237,252,246,0.95); backdrop-filter: blur(8px); padding: 8px 16px 10px; display: flex; gap: 8px; border-bottom: 1px solid #e5f5f0; }
+    .tab-btn { flex: 1; padding: 0.6rem 0.5rem; border-radius: 12px; border: 1.5px solid #e5e7eb; background: #fff; color: var(--teks-sekunder); font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: all 0.15s; text-align: center; }
+    .tab-btn.aktif { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 8px rgba(62,201,158,0.3); }
+    .tab-btn.aktif.pure { background: #A78BFA; border-color: #A78BFA; box-shadow: 0 2px 8px rgba(167,139,250,0.3); }
+    .konten-tab { top: 104px !important; }
   </style>
 </head>
 <body>
@@ -125,19 +133,23 @@
   <div class="header-fix">
     <div class="flex justify-between items-center">
       <h2 class="text-lg font-extrabold" style="color: var(--teks);">Minigame</h2>
-      <span class="text-xs font-bold px-3 py-1 rounded-full" style="background: var(--primary); color:#fff;">6 Game</span>
+      <span class="text-xs font-bold px-3 py-1 rounded-full" style="background: var(--primary); color:#fff;">5 Game</span>
     </div>
   </div>
 
+  <!-- Tabs Waifu / Pure MTK -->
+  <div class="tab-wrap">
+    <button class="tab-btn aktif" data-tab="waifu" id="tab-waifu">Waifu</button>
+    <button class="tab-btn pure" data-tab="pure" id="tab-pure">Pure MTK</button>
+  </div>
+
   <!-- Konten -->
-  <div class="konten-halaman ada-header scrollable px-4 pt-4 pb-4">
-    <p class="text-xs font-semibold mb-3" style="color: var(--teks-sekunder);">Pilih mode permainan — semua soal tetap pakai waifu koleksimu!</p>
+  <div class="konten-halaman ada-header scrollable px-4 pt-4 pb-4 konten-tab" id="konten-minigame">
+    <div class="grid grid-cols-1 gap-4" id="grid-minigame">
 
-    <div class="grid grid-cols-1 gap-4">
-
-      <!-- Card: Game Casual (aktif) -->
-      <a href="game-casual.html" style="text-decoration: none;">
-        <div class="game-card">
+      <!-- Card: Game Casual -->
+      <a href="game-casual.html" class="game-entry" data-cat="waifu" style="text-decoration: none;">
+        <div class="game-card" style="border-color: #eef2f7;">
           <div class="game-thumb game-thumb-casual">
             <div class="game-thumb-icon">
               <!-- icon pedang / battle -->
@@ -158,9 +170,9 @@
         </div>
       </a>
 
-      <!-- Card: Endless (1x/hari) -->
-      <a href="game-endless.html" style="text-decoration: none;">
-        <div class="game-card">
+      <!-- Card: Endless -->
+      <a href="game-endless.html" class="game-entry" data-cat="waifu" style="text-decoration: none;">
+        <div class="game-card" style="border-color: #eef2f7;">
           <div class="game-thumb" style="background: linear-gradient(135deg,#FF7FA0 0%, #3EC99E 100%);">
             <div class="game-thumb-icon">
               <!-- icon infinity -->
@@ -181,9 +193,9 @@
         </div>
       </a>
 
-      <!-- Card: Raid Weekly (Baru, 10k HP) -->
-      <a href="game-raid.html" style="text-decoration: none;">
-        <div class="game-card" style="border: 1.5px solid var(--aksen);">
+      <!-- Card: Raid Weekly -->
+      <a href="game-raid.html" class="game-entry" data-cat="waifu" style="text-decoration: none;">
+        <div class="game-card" style="border-color: #eef2f7;">
           <div class="game-thumb" style="background: linear-gradient(135deg,#FF7FA0 0%, #F5C842 100%);">
             <div class="game-thumb-icon">
               <!-- icon boss / raid -->
@@ -204,9 +216,9 @@
         </div>
       </a>
 
-      <!-- Card: Kelas (Baru, Pure Math) -->
-      <a href="game-class.html" style="text-decoration: none;">
-        <div class="game-card" style="border: 1.5px solid var(--primary);">
+      <!-- Card: Kelas -->
+      <a href="game-class.html" class="game-entry" data-cat="pure" style="text-decoration: none;">
+        <div class="game-card" style="border-color: #eef2f7;">
           <div class="game-thumb" style="background: linear-gradient(135deg,#A78BFA 0%, #3EC99E 100%);">
             <div class="game-thumb-icon">
               <!-- icon kelas / book -->
@@ -227,15 +239,15 @@
         </div>
       </a>
 
-      <!-- Card: Decoder (Pure MTK) -->
-      <a href="game-decoder.html" style="text-decoration: none;">
-        <div class="game-card" style="border: 1.5px solid #F5C842;">
+      <!-- Card: Decoder -->
+      <a href="game-decoder.html" class="game-entry" data-cat="pure" style="text-decoration: none;">
+        <div class="game-card" style="border-color: #eef2f7;">
           <div class="game-thumb" style="background: linear-gradient(135deg,#F5C842 0%, #FF7FA0 100%);">
             <div class="game-thumb-icon">
               <!-- icon lock / key puzzle -->
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 018 0v2"/><path d="M12 11v4"/><circle cx="12" cy="15" r="1" fill="currentColor" stroke="none"/></svg>
             </div>
-            <span class="game-badge badge-ready">Pure MTK</span>
+            <span class="game-badge badge-ready">Misteri</span>
           </div>
           <div class="game-info">
             <p class="game-nama">Decoder</p>
@@ -250,8 +262,8 @@
         </div>
       </a>
 
-      <!-- Card placeholder future (opsional, bisa tambah nanti) -->
-      <div class="game-card soon">
+      <!-- Card placeholder future (opsional) -->
+      <div class="game-card soon game-entry" data-cat="soon" style="display:none;">
         <div class="game-thumb game-thumb-locked">
           <div class="game-thumb-icon" style="background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.08);">
             <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
@@ -267,6 +279,21 @@
 
     </div>
   </div>
+
+  <script>
+    (function(){
+      const tabs=document.querySelectorAll('.tab-btn');
+      const entries=document.querySelectorAll('.game-entry');
+      function setTab(cat){
+        tabs.forEach(b=> b.classList.toggle('aktif', b.dataset.tab===cat));
+        entries.forEach(a=> a.style.display = (a.dataset.cat===cat) ? '' : 'none');
+        localStorage.setItem('wmc:minigame:tab', cat);
+      }
+      tabs.forEach(b=> b.addEventListener('click', ()=> setTab(b.dataset.tab)));
+      const saved=localStorage.getItem('wmc:minigame:tab') || 'waifu';
+      setTab(saved);
+    })();
+  </script>
 
   <!-- Bottom Navigation — 6 menu, Minigame aktif -->
   <nav class="bottom-nav">
