@@ -133,7 +133,7 @@
   <div class="header-fix">
     <div class="flex justify-between items-center">
       <h2 class="text-lg font-extrabold" style="color: var(--teks);">Minigame</h2>
-      <span class="text-xs font-bold px-3 py-1 rounded-full" style="background: var(--primary); color:#fff;">5 Game</span>
+      <span class="text-xs font-bold px-3 py-1 rounded-full" style="background: var(--primary); color:#fff;">6 Game</span>
     </div>
   </div>
 
@@ -235,6 +235,29 @@
               <span class="game-tag">5 frag → 1 <img src="assets/ui/icon_key_silver.svg" style="width:1em;height:1em;vertical-align:middle;display:inline;"></span>
             </div>
             <button class="btn-main" style="background: linear-gradient(135deg,#A78BFA,#3EC99E); color:#fff;" onclick="event.preventDefault(); location.href='game-class.html'">Buka Kelas →</button>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card: Guess -->
+      <a href="game-guess.html" class="game-entry" data-cat="pure" style="text-decoration: none;">
+        <div class="game-card" style="border-color: #eef2f7;">
+          <div class="game-thumb" style="background: linear-gradient(135deg,#06B6D4 0%, #3EC99E 100%);">
+            <div class="game-thumb-icon">
+              <!-- icon guess / target -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16" r="1" fill="currentColor" stroke="none"/><path d="M9 9a3 3 0 016 0"/></svg>
+            </div>
+            <span class="game-badge badge-ready">1x / Hari</span>
+          </div>
+          <div class="game-info">
+            <p class="game-nama">Tebak Angka</p>
+            <p class="game-deskripsi">Server pilih 1-100, kamu tebak 10x dengan hint kecil/besar. Benar = +1 Key. 1x/hari via numpad.</p>
+            <div class="game-meta">
+              <span class="game-tag">1-100</span>
+              <span class="game-tag">10x</span>
+              <span class="game-tag">Numpad</span>
+            </div>
+            <button class="btn-main" style="background: linear-gradient(135deg,#06B6D4,#3EC99E); color:#fff;" onclick="event.preventDefault(); location.href='game-guess.html'">Tebak →</button>
           </div>
         </div>
       </a>
