@@ -140,12 +140,14 @@ function wire(){
   document.getElementById('btn-serang')?.addEventListener('click', ()=>{
     if(!season) return
     if(season.status==='finished'){ showToast('Boss sudah kalah — hadiah sudah dibagikan'); return }
-    if(season._cap_harian){ showToast('Cap 5 serang/hari tercapai — kembali besok'); return }
+    if(season._cap_harian){ showCapModal(); return }
     showScreen('arena')
     applyBoss()
     mulaiRonde()
   })
   document.getElementById('btn-kalah-kembali')?.addEventListener('click', ()=> location.href='minigame.html')
+  document.getElementById('btn-cap-kembali')?.addEventListener('click', hideCapModal)
+  document.getElementById('modal-cap-raid')?.addEventListener('click', (e)=>{ if(e.target.id==='modal-cap-raid') hideCapModal() })
 }
 
 function subscribeRealtime(seasonId){
@@ -166,6 +168,15 @@ function subscribeRealtime(seasonId){
       }
     }).subscribe()
   }catch{}
+}
+
+function showCapModal(){
+  document.getElementById('modal-cap-raid')?.classList.remove('hidden')
+}
+function hideCapModal(){
+  document.getElementById('modal-cap-raid')?.classList.add('hidden')
+  showScreen('info')
+  muatSeasonInfo()
 }
 
 async function handleBossKalah(){
@@ -268,23 +279,19 @@ async function jawab(opsiDipilih, jawabanBenar, btnEl){
   const {data, error}=await supabase.functions.invoke('serang-raid',{body:{season_id: season.id, card_id: kartuTerpilih.card_id||kartuTerpilih.id, rarity_slot: kartuTerpilih.rarity, benar, damage}})
   if(error){
     const msg=String(error.message||'')
-    // cek cap dari error body jika ada
-    // @ts-ignore supabase-js error context
-    const ctx=(error as any)?.context
-    if(msg.includes('Cap harian') || (data as any)?.cap_harian){
-      showToast('Cap 5 serang/hari tercapai')
+    const capData = data && data.cap_harian
+    if(msg.includes('Cap harian') || capData){
       season._cap_harian=true
-      document.getElementById('log-raid').textContent='Cap harian tercapai — kembali besok'
+      showCapModal()
       tampilState('pilih')
       return
     }
     showToast('Gagal serang'); tampilState('pilih'); return
   }
   // handle cap dari response 429 yang di-wrap sebagai error=false tapi data.cap_harian
-  if((data as any)?.error && (data as any)?.cap_harian){
-    showToast('Cap 5 serang/hari tercapai')
+  if(data && data.error && data.cap_harian){
     season._cap_harian=true
-    document.getElementById('log-raid').textContent='Cap harian tercapai'
+    showCapModal()
     tampilState('pilih')
     return
   }
