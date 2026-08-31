@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Flash Math — Waifu Math Clash</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: var(--bg); overflow: hidden; }
+    .tier-card { background:#fff; border-radius:16px; padding:0.9rem 1rem; box-shadow:0 2px 10px rgba(0,0,0,0.06); cursor:pointer; border:2px solid transparent; transition: all 0.12s; }
+    .tier-card.selected { border-color: var(--primary); background:#f0fff8; transform: scale(0.98); }
+    .flash-area { flex:1; display:flex; align-items:center; justify-content:center; background: #1a1a2e; position:relative; overflow:hidden; }
+    .flash-num { font-size: 3.5rem; font-weight: 800; color:#fff; text-shadow:0 4px 16px rgba(0,0,0,0.4); letter-spacing:0.04em; }
+    .flash-num.plus { color: #3EC99E; }
+    .flash-num.minus { color: #FF7FA0; }
+    .progress-flash { display:flex; gap:4px; justify-content:center; margin-top:8px; }
+    .pf-dot { width:8px; height:8px; border-radius:50%; background:#e5e7eb; }
+    .pf-dot.done { background: var(--primary); }
+    .pf-dot.active { background: var(--aksen); transform: scale(1.2); }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header-fix">
+    <div class="flex justify-between items-center">
+      <a href="minigame.html" style="color: var(--primary); font-weight:800; text-decoration:none;">← Minigame</a>
+      <h2 class="text-base font-extrabold" style="color: var(--teks);">Flash Math</h2>
+      <span id="header-cap" class="text-xs font-bold px-2 py-1 rounded-full" style="background:#fff; border:1.5px solid var(--primary); color:var(--primary);">0/30 <img src="assets/ui/icon_key_silver.svg" style="width:1em;height:1em;vertical-align:middle;display:inline;"></span>
+    </div>
+  </div>
+
+  <!-- View Pilih Hadiah -->
+  <div id="view-pilih" class="konten-halaman ada-header scrollable px-4 pt-4 pb-4">
+    <div class="bg-white rounded-2xl p-4 shadow-md mb-4 text-center">
+      <div class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-2" style="background: linear-gradient(135deg,#3EC99E,#F5C842); color:#fff;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:28px;height:28px;"><path d="M13 2L3 14h9l-1 9 10-12h-9l1-9z"/></svg>
+      </div>
+      <h3 class="font-extrabold" style="color: var(--teks);">Pilih Hadiah</h3>
+      <p class="text-xs mt-1" style="color: var(--teks-sekunder);">Angka muncul 1 detik/angka, operasi +/− saja. Cap harian 30 keys.</p>
+    </div>
+
+    <div class="space-y-3">
+      <div class="tier-card" data-tier="1" id="tier-1">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="font-extrabold" style="color: var(--teks);">5 Keys</p>
+            <p class="text-xs" style="color: var(--teks-sekunder);">10 angka • 10 detik flash</p>
+          </div>
+          <span class="text-lg font-extrabold" style="color: var(--primary);">5 <img src="assets/ui/icon_key_silver.svg" style="width:1em;height:1em;vertical-align:middle;display:inline;"></span>
+        </div>
+      </div>
+      <div class="tier-card" data-tier="2" id="tier-2">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="font-extrabold" style="color: var(--teks);">10 Keys</p>
+            <p class="text-xs" style="color: var(--teks-sekunder);">15 angka • 15 detik flash</p>
+          </div>
+          <span class="text-lg font-extrabold" style="color: var(--primary);">10 <img src="assets/ui/icon_key_silver.svg" style="width:1em;height:1em;vertical-align:middle;display:inline;"></span>
+        </div>
+      </div>
+      <div class="tier-card" data-tier="3" id="tier-3">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="font-extrabold" style="color: var(--teks);">15 Keys</p>
+            <p class="text-xs" style="color: var(--teks-sekunder);">20 angka • 20 detik flash</p>
+          </div>
+          <span class="text-lg font-extrabold" style="color: var(--primary);">15 <img src="assets/ui/icon_key_silver.svg" style="width:1em;height:1em;vertical-align:middle;display:inline;"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="cap-info" class="mt-4 bg-white rounded-xl p-3 text-xs text-center shadow-sm hidden" style="color: var(--aksen); font-weight:700;"></div>
+
+    <button id="btn-mulai-flash" class="btn-utama w-full mt-4" style="padding:1rem;">Mulai Flash →</button>
+  </div>
+
+  <!-- View Flash -->
+  <div id="view-flash" class="hidden konten-halaman ada-header" style="display:none; flex-direction:column; background:#1a1a2e;">
+    <div class="flash-area" id="flash-area">
+      <div id="flash-num" class="flash-num">—</div>
+      <div id="flash-count" class="absolute top-3 right-3 text-xs font-bold px-2 py-1 rounded-full" style="background: rgba(0,0,0,0.4); color:#fff;">0/10</div>
+    </div>
+    <div class="bg-white px-4 py-3" style="flex-shrink:0;">
+      <div class="progress-flash" id="progress-flash"></div>
+      <p class="text-xs text-center mt-2 font-semibold" style="color: var(--teks-sekunder);" id="flash-status">Siap...</p>
+    </div>
+  </div>
+
+  <!-- View Input Jawaban -->
+  <div id="view-input" class="hidden konten-halaman ada-header" style="display:none; flex-direction:column;">
+    <div class="px-4 pt-4 pb-2" style="background: var(--bg);">
+      <div class="bg-white rounded-2xl p-4 shadow-md text-center">
+        <p class="text-xs font-bold" style="color: var(--teks-sekunder);">Masukkan Hasil</p>
+        <p class="text-xs mt-1" style="color: var(--teks-sekunder);">Total dari angka yang barusan muncul</p>
+      </div>
+    </div>
+    <div class="flex-1 overflow-y-auto px-4 py-4" style="background: var(--bg);">
+      <div id="numpad-wrap" class="bg-white rounded-2xl p-3 shadow-md"></div>
+      <p id="input-status" class="text-center text-xs font-semibold mt-3" style="color: var(--teks-sekunder);"></p>
+      <button id="btn-kembali-pilih" class="btn-outline w-full mt-3">Kembali</button>
+    </div>
+  </div>
+
+  <!-- Modal Hasil -->
+  <div id="modal-hasil-flash" class="modal-overlay hidden" style="z-index:9000;">
+    <div class="modal-box text-center">
+      <div id="hasil-icon-flash" class="text-4xl mb-2">🎉</div>
+      <h3 id="hasil-judul-flash" class="modal-judul">Benar!</h3>
+      <p id="hasil-desc-flash" class="text-sm mb-1" style="color: var(--teks-sekunder);">—</p>
+      <p id="hasil-reward-flash" class="text-lg font-extrabold mb-4" style="color: var(--primary);">—</p>
+      <button id="btn-hasil-kembali" class="btn-utama">Kembali</button>
+      <button id="btn-hasil-lagi" class="btn-outline mt-2">Main Lagi</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/game-flash.js"></script>
+</body>
+</html>

@@ -182,7 +182,6 @@ function hideSurrenderModal() {
 async function confirmSurrender() {
   hideSurrenderModal()
   if (sudahSelesai || !battle) return
-  sudahSelesai = true
   clearInterval(afkInterval)
   stopTimer()
   try {
@@ -190,16 +189,16 @@ async function confirmSurrender() {
       body: { battle_id: battle.id, winner: 'opponent' }
     })
   } catch {}
+  // selesaiBattle punya guard sudahSelesai, jadi jangan set flag sebelum panggil
   selesaiBattle('opponent')
-  // Tidak ada delay 1.5 detik — modal kalah langsung tampil, user klik Kembali untuk keluar
 }
 async function surrenderBattle() { showSurrenderModal() }
 
 // ================= State battle (PvE only) =================
 let session, player, battle, botData
-let kartuPlayerPool = { common: [], rare: [], epic: [] }
+let kartuPlayerPool = { common: [], rare: [], epic: [], legendary: [] }
 let kartuBot = { common: null, rare: null, epic: null }
-let slotPreview = { common: null, rare: null, epic: null }
+let slotPreview = { common: null, rare: null, epic: null, legendary: null }
 let kartuTerpilih = null
 let timerInterval = null
 let afkInterval = null
@@ -214,8 +213,10 @@ function timerDariatk(atk) {
   if (atk <= 80) return 8
   return 10
 }
+const FALLBACK_WAIFU = 'assets/ui/fallback-waifu.webp'
 function borderUrl(rarity) {
-  return `assets/ui/border_${rarity}.png`
+  // border tidak lagi dipakai di arena — pure img saja, fallback ke fallback-waifu.webp
+  return FALLBACK_WAIFU
 }
 function labelKesulitan(atk) {
   if (atk <= 20) return 'Sangat Mudah'
@@ -322,7 +323,7 @@ async function muatKartuPlayer() {
     .eq('player_id', session.user.id)
 
   if (error || !data) return
-  kartuPlayerPool = { common: [], rare: [], epic: [] }
+  kartuPlayerPool = { common: [], rare: [], epic: [], legendary: [] }
   data.forEach(row => {
     const rarity = row.cards?.rarity
     if (!rarity || !(rarity in kartuPlayerPool)) return
@@ -345,6 +346,7 @@ async function muatInfoLawan() {
   botData = bot
   document.getElementById('nama-lawan').textContent = bot?.name || 'Bot'
 
+  // Bot tidak boleh random legendary — hanya common/rare/epic
   for (const rarity of ['common', 'rare', 'epic']) {
     const { data } = await supabase
       .from('cards')
@@ -391,20 +393,22 @@ function labelGiliran(teks) {
 function renderSlotRarity() {
   const wrap = document.getElementById('slot-rarity-wrap')
   wrap.innerHTML = ''
-  for (const rarity of ['common', 'rare', 'epic']) {
+  // Player bisa pakai legendary (dari Shop), legendary tampil paling kanan
+  for (const rarity of ['common', 'rare', 'epic', 'legendary']) {
     const pool = kartuPlayerPool[rarity] || []
     const div = document.createElement('div')
     div.className = 'slot-rarity' + (pool.length > 0 ? '' : ' disabled')
     if (pool.length > 0) {
       const preview = pool[Math.floor(Math.random() * pool.length)]
       slotPreview[rarity] = preview
+      const atkPreview = preview.current_atk ?? preview.base_atk ?? 0
       div.innerHTML = `
         <div class="slot-gambar-mini">
-          ${preview.image_url ? `<img src="${preview.image_url}" alt="${preview.name}">` : ''}
+          ${preview.image_url ? `<img src="${preview.image_url}" alt="${preview.name}" onerror="this.onerror=null;this.src='assets/ui/fallback-waifu.webp'">` : `<img src="assets/ui/fallback-waifu.webp" alt="">`}
         </div>
         <p class="text-xs font-bold" style="color:var(--teks);text-transform:capitalize;">${rarity} ×${pool.length}</p>
-        <p class="text-xs" style="color:var(--teks-sekunder);">Random ATK</p>
-        <p class="text-xs" style="color:var(--teks-sekunder); font-style:italic;">Tap untuk random</p>
+        <p class="text-xs font-bold" style="color:var(--primary);">ATK ${atkPreview}</p>
+        <p class="text-xs" style="color:var(--teks-sekunder); font-style:italic;">${labelKesulitan(atkPreview)}</p>
       `
       div.addEventListener('click', () => pilihKartu(rarity))
     } else {
@@ -548,6 +552,7 @@ async function jawab(opsiDipilih, jawabanBenar, btnEl) {
 // ================= Giliran Bot =================
 async function giliranBot() {
   if (sudahSelesai) return
+  // Bot tidak boleh pakai legendary — filter hanya 3 rarity
   const rarityTersedia = ['common', 'rare', 'epic'].filter(r => kartuBot[r])
   if (rarityTersedia.length === 0) {
     await supabase.functions.invoke('selesai-battle', {
@@ -618,8 +623,11 @@ function updateHP(hpPlayer, hpLawan) {
 }
 
 function updateWaifuAktif(kartu) {
-  document.getElementById('waifu-aktif-gambar').src = kartu.image_url || ''
-  document.getElementById('waifu-aktif-border').src = borderUrl(kartu.rarity)
+  const img = document.getElementById('waifu-aktif-gambar')
+  if (!img) return
+  // Pure img tanpa border — fallback ke fallback-waifu.webp jika kosong atau error
+  img.onerror = () => { img.onerror = null; img.src = FALLBACK_WAIFU }
+  img.src = kartu?.image_url || FALLBACK_WAIFU
 }
 
 function tampilDamageFloat(damage) {

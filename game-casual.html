@@ -23,14 +23,6 @@
       object-fit: cover;
       object-position: top;
     }
-    #waifu-aktif-border {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: fill;
-      pointer-events: none;
-    }
     #label-giliran {
       position: absolute;
       top: 8px; left: 50%;
@@ -155,7 +147,7 @@
       <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-md mb-6">
         <h3 class="font-extrabold text-sm mb-3" style="color: var(--teks);">Peraturan:</h3>
         <ul class="space-y-2 text-sm" style="color: var(--teks-sekunder);">
-          <li class="flex gap-2"><span>•</span><span>Pilih 1 dari 3 slot rarity (Common / Rare / Epic) — kartu <b>random</b> dari koleksimu sesuai rarity.</span></li>
+          <li class="flex gap-2"><span>•</span><span>Pilih 1 dari 4 slot rarity (Common / Rare / Epic / Legendary) — kartu <b>random</b> dari koleksimu sesuai rarity. Legendary hanya via Shop, Bot tidak pakai Legendary.</span></li>
           <li class="flex gap-2"><span>•</span><span>Jawab soal matematika benar → damage = ATK kartu. Salah / timeout → giliran hangus.</span></li>
           <li class="flex gap-2"><span>•</span><span>Waktu menjawab = ATK 1–20: 5 dtk, 21–40: 6 dtk, 41–60: 7 dtk, 61–80: 8 dtk, 81+: 10 dtk.</span></li>
           <li class="flex gap-2"><span>•</span><span>Total HP = Rank × 100.</span></li>
@@ -188,8 +180,7 @@
   <div id="screen-arena" class="flex flex-col flex-1 hidden" style="height: 100vh;">
   <!-- Area waifu aktif -->
   <div id="area-waifu">
-    <img id="waifu-aktif-gambar" src="" alt="">
-    <img id="waifu-aktif-border" src="" alt="">
+    <img id="waifu-aktif-gambar" src="assets/ui/fallback-waifu.webp" alt="" onerror="this.onerror=null;this.src='assets/ui/fallback-waifu.webp'">
     <div id="label-giliran">Giliran: -</div>
 
     <!-- Damage float container -->

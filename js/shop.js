@@ -29,12 +29,12 @@ async function muatPlayer() {
 async function muatShop() {
   const grid = document.getElementById('grid-shop')
 
-  // Ambil semua kartu Epic yang is_shop = true
+  // Ambil semua kartu Legendary yang is_shop = true (Legendary hanya via Shop, tidak via Gacha)
   const { data: kartu } = await supabase
     .from('cards')
     .select('id, name, image_url, rarity, base_atk, shop_price')
     .eq('is_shop', true)
-    .eq('rarity', 'epic')
+    .eq('rarity', 'legendary')
     .order('base_atk', { ascending: false })
 
   if (!kartu?.length) {
@@ -75,7 +75,7 @@ async function muatShop() {
     div.innerHTML = `
       <div class="shop-card-gambar">
         <img class="gambar-waifu" src="${k.image_url || ''}" alt="${k.name}" loading="lazy">
-        <img class="gambar-border" src="assets/ui/border_epic.png" alt="">
+        <img class="gambar-border" src="assets/ui/border_${k.rarity}.webp" alt="">
       </div>
       <div class="shop-card-info">
         <p class="text-xs font-bold mb-1" style="color:var(--teks);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${k.name}</p>
@@ -97,7 +97,7 @@ async function muatShop() {
 function bukaModal(kartu) {
   kartuKonfirm = kartu
   document.getElementById('konfirm-gambar').src = kartu.image_url || ''
-  document.getElementById('konfirm-border').src = 'assets/ui/border_epic.png'
+  document.getElementById('konfirm-border').src = `assets/ui/border_${kartu.rarity}.webp`
   document.getElementById('konfirm-nama').textContent = kartu.name
   document.getElementById('konfirm-harga').innerHTML = `${kartu.shop_price} <img src="assets/ui/icon_key_gold.svg" alt="key" style="width:1em;height:1em;vertical-align:middle;display:inline;"> Key Gold`
   document.getElementById('modal-beli').classList.remove('hidden')

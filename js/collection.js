@@ -5,7 +5,7 @@ let session
 let kartuList = [] // semua player_cards dalam banner aktif
 let indexAktif = 0
 
-const BIAYA_UPGRADE = { epic: 1, rare: 3, common: 5 }
+const BIAYA_UPGRADE = { legendary: 1, epic: 1, rare: 3, common: 5 }
 const CACHE_TTL = 2 * 60 * 1000 // 2 menit — koleksi sering berubah setelah gacha/upgrade
 
 async function init() {
@@ -46,7 +46,7 @@ function renderListBanner(playerCards, container) {
     const div = document.createElement('div')
     div.className = 'banner-kol-card'
 
-    // Ambil 3 kartu untuk strip (epic, rare, common)
+    // Ambil 3 kartu untuk strip (legendary, epic, rare, common — prioritas tertinggi dulu, max 3)
     const kartuPerRarity = {}
     info.kartu.forEach(k => {
       const r = k.cards?.rarity
@@ -57,7 +57,7 @@ function renderListBanner(playerCards, container) {
     const strip = document.createElement('div')
     strip.className = 'banner-strip'
 
-    const urutan = ['epic', 'rare', 'common']
+    const urutan = ['legendary', 'epic', 'rare', 'common']
     const sorted = urutan
       .map(r => kartuPerRarity[r])
       .filter(Boolean)
@@ -84,13 +84,14 @@ function renderListBanner(playerCards, container) {
     })
 
     // Info teks kanan
-    const rarityCounts = { epic: 0, rare: 0, common: 0 }
+    const rarityCounts = { legendary: 0, epic: 0, rare: 0, common: 0 }
     info.kartu.forEach(k => {
       const r = k.cards?.rarity
       if (rarityCounts[r] !== undefined) rarityCounts[r]++
     })
 
     const badges = [
+      rarityCounts.legendary > 0 ? `<span class="banner-badge badge-legendary">Legendary ×${rarityCounts.legendary}</span>` : '',
       rarityCounts.epic   > 0 ? `<span class="banner-badge badge-epic">Epic ×${rarityCounts.epic}</span>` : '',
       rarityCounts.rare   > 0 ? `<span class="banner-badge badge-rare">Rare ×${rarityCounts.rare}</span>` : '',
       rarityCounts.common > 0 ? `<span class="banner-badge badge-common">Common ×${rarityCounts.common}</span>` : '',
@@ -182,10 +183,10 @@ async function bukaDetailBanner(bannerKey, bannerLabel, kartu) {
   })
   const kartuUnik = Object.values(kartuUnikMap)
 
-  // Urutkan Epic → Rare → Common
-  const urutanRarity = { epic: 0, rare: 1, common: 2 }
+  // Urutkan Legendary → Epic → Rare → Common
+  const urutanRarity = { legendary: 0, epic: 1, rare: 2, common: 3 }
   kartuList = kartuUnik.sort((a, b) =>
-    (urutanRarity[a.cards?.rarity] ?? 3) - (urutanRarity[b.cards?.rarity] ?? 3)
+    (urutanRarity[a.cards?.rarity] ?? 4) - (urutanRarity[b.cards?.rarity] ?? 4)
   )
   indexAktif = 0
 
@@ -209,7 +210,7 @@ function tampilKartu(idx) {
   document.getElementById('kartu-gambar').src = kartu?.image_url || ''
   document.getElementById('kartu-gambar').loading = 'eager'
   document.getElementById('kartu-gambar').decoding = 'async'
-  document.getElementById('kartu-border').src = `assets/ui/border_${kartu?.rarity || 'common'}.png`
+  document.getElementById('kartu-border').src = `assets/ui/border_${kartu?.rarity || 'common'}.webp`
   document.getElementById('kartu-nama').textContent = kartu?.name || '-'
   document.getElementById('kartu-atk').textContent = `ATK: ${pc.current_atk}`
   document.getElementById('kartu-duplikat').textContent = `Duplikat: ${pc.jumlah_duplikat ?? 0}`
@@ -230,7 +231,7 @@ function tampilKartu(idx) {
 function updateTombolAksi(pc) {
   const kartu = pc.cards
   const rarity = kartu?.rarity || 'common'
-  const biaya = BIAYA_UPGRADE[rarity]
+  const biaya = BIAYA_UPGRADE[rarity] ?? 5
   const duplikat = pc.jumlah_duplikat ?? 0
   const bintang = pc.stars ?? 0
 
@@ -243,7 +244,7 @@ function updateTombolAksi(pc) {
   if (bintang >= 5 && duplikat > 0) {
     // Bintang max, ada duplikat → konversi ke Key Gold
     btnUpgrade.innerHTML = `Konversi → <img src="assets/ui/icon_key_gold.svg" alt="key" style="width:1em;height:1em;vertical-align:middle;display:inline;"> Gold (${duplikat} duplikat)`
-    btnUpgrade.style.background = 'var(--rarity-epic)'
+    btnUpgrade.style.background = rarity === 'legendary' ? 'var(--rarity-legendary)' : 'var(--rarity-epic)'
     btnUpgrade.disabled = false
     infoUpgrade.textContent = 'Setiap duplikat = 1 Key Gold'
   } else if (bintang >= 5) {

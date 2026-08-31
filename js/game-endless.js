@@ -15,8 +15,8 @@ function showScreen(nama) {
 
 // ================= State =================
 let session, player
-let kartuPool = { common: [], rare: [], epic: [] }
-let slotPreview = { common: null, rare: null, epic: null }
+let kartuPool = { common: [], rare: [], epic: [], legendary: [] }
+let slotPreview = { common: null, rare: null, epic: null, legendary: null }
 let kartuTerpilih = null
 let runId = null
 let totalDamage = 0
@@ -134,7 +134,7 @@ async function init() {
 
 async function muatKartuPool() {
   const { data } = await supabase.from('player_cards').select('id, card_id, stars, current_atk, cards!inner(name, image_url, rarity, base_atk)').eq('player_id', session.user.id)
-  kartuPool = { common: [], rare: [], epic: [] }
+  kartuPool = { common: [], rare: [], epic: [], legendary: [] }
   ;(data||[]).forEach(row=>{
     const r = row.cards?.rarity
     if(!r || !(r in kartuPool)) return
@@ -212,7 +212,7 @@ function tampilState(state) {
 function renderSlotRarity() {
   const wrap = document.getElementById('slot-rarity-wrap')
   wrap.innerHTML=''
-  for (const rarity of ['common','rare','epic']) {
+  for (const rarity of ['common','rare','epic','legendary']) {
     const pool = kartuPool[rarity]||[]
     const div = document.createElement('div')
     div.className = 'slot-rarity' + (pool.length>0?'':' disabled')

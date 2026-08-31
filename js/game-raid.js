@@ -3,8 +3,8 @@ import { requireAuth, showToast } from './utils.js'
 
 let session, player
 let season=null
-let kartuPool={common:[],rare:[],epic:[]}
-let slotPreview={common:null,rare:null,epic:null}
+let kartuPool={common:[],rare:[],epic:[],legendary:[]}
+let slotPreview={common:null,rare:null,epic:null,legendary:null}
 let kartuTerpilih=null
 let timerInterval=null
 let sudahSelesai=false
@@ -18,7 +18,7 @@ function showScreen(n){
   if(arena){ arena.classList.toggle('hidden', n!=='arena'); arena.style.display = n==='arena' ? 'flex' : '' }
 }
 function timerDariAtk(atk){ if(atk<=20) return 5; if(atk<=40) return 6; if(atk<=60) return 7; if(atk<=80) return 8; return 10 }
-function borderUrl(r){ return `assets/ui/border_${r}.png` }
+function borderUrl(r){ return `assets/ui/border_${r}.webp` }
 function getBossSrc(){
   if(!season) return `assets/boss/raid-boss-1.webp`
   // week_start Senin, pakai week number mod 7 untuk rotasi
@@ -51,7 +51,7 @@ async function init(){
 
 async function muatKartuPool(){
   const {data}=await supabase.from('player_cards').select('id, card_id, stars, current_atk, cards!inner(name, image_url, rarity, base_atk)').eq('player_id', session.user.id)
-  kartuPool={common:[],rare:[],epic:[]}
+  kartuPool={common:[],rare:[],epic:[],legendary:[]}
   ;(data||[]).forEach(r=>{
     const rar=r.cards?.rarity
     if(!rar||!(rar in kartuPool)) return
@@ -204,7 +204,7 @@ function tampilState(state){
 function renderSlot(){
   const wrap=document.getElementById('slot-wrap')
   wrap.innerHTML=''
-  for(const rarity of ['common','rare','epic']){
+  for(const rarity of ['common','rare','epic','legendary']){
     const pool=kartuPool[rarity]||[]
     const div=document.createElement('div')
     div.className='slot-rarity' + (pool.length>0?'':' disabled')

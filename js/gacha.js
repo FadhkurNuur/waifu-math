@@ -86,12 +86,13 @@ async function muatListBanner() {
     container.innerHTML = '<p class="text-center text-sm mt-8" style="color: var(--teks-sekunder);">Memuat banner...</p>'
   }
 
-  // Fetch fresh di background
+  // Fetch fresh di background — legendary tidak ikut gacha, jadi filter out
   try {
     const { data: allCards } = await supabase
       .from('cards')
       .select('banner, banner_label, image_url, name, rarity')
       .neq('banner', null)
+      .neq('rarity', 'legendary')
 
     if (!allCards?.length) {
       if (!cached?.length) {
@@ -164,6 +165,7 @@ function buatBannerCard(bannerData) {
     rarityCounts.rare   > 0 ? `<span class="banner-badge badge-rare">Rare ×${rarityCounts.rare}</span>` : '',
     rarityCounts.common > 0 ? `<span class="banner-badge badge-common">Common ×${rarityCounts.common}</span>` : '',
   ].join('')
+  // Legendary tidak ditampilkan di Gacha — hanya via Shop
 
   div.innerHTML = `
     <div class="banner-info">
@@ -184,6 +186,7 @@ function renderDetailGrid(kartu, container) {
   grid.className = 'kartu-grid'
   const PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
   // Urutkan: rarity Epic→Rare→Common → ATK tertinggi dulu → nama A-Z
+  // Legendary tidak tampil di gacha, jadi urutan tidak perlu legendary
   const urutan = { epic: 0, rare: 1, common: 2 }
   const sortedKartu = [...(kartu || [])].sort((a, b) => {
     const r = (urutan[a.rarity] ?? 3) - (urutan[b.rarity] ?? 3)
@@ -195,7 +198,7 @@ function renderDetailGrid(kartu, container) {
   sortedKartu.forEach(k => {
     const item = document.createElement('div')
     item.className = 'kartu-grid-item'
-    const borderSrc = `assets/ui/border_${k.rarity}.png`
+    const borderSrc = `assets/ui/border_${k.rarity}.webp`
     item.innerHTML = `
       <div style="position: relative;">
         ${k.image_url
@@ -240,9 +243,10 @@ async function bukaDetailBanner(banner) {
       .from('cards')
       .select('*')
       .eq('banner', banner.banner)
+      .neq('rarity', 'legendary')
 
     if (kartu?.length) {
-      // Sort: rarity Epic→Rare→Common → ATK desc → nama asc
+      // Sort: rarity Epic→Rare→Common → ATK desc → nama asc (legendary tidak di gacha)
       const urutan = { epic: 0, rare: 1, common: 2 }
       const sortFn = (a, b) => {
         const r = (urutan[a.rarity] ?? 3) - (urutan[b.rarity] ?? 3)
@@ -316,6 +320,7 @@ function tampilReveal(data) {
   document.getElementById('reveal-nama').textContent = data.kartu.name
   document.getElementById('reveal-atk').textContent = `ATK: ${data.kartu.base_atk}`
   const rarityMap = {
+    legendary: { warna: 'var(--rarity-legendary)', label: '👑 LEGENDARY' },
     epic: { warna: 'var(--rarity-epic)', label: '✨ EPIC' },
     rare: { warna: 'var(--rarity-rare)', label: '⭐ RARE' },
     common: { warna: 'var(--rarity-common)', label: 'COMMON' },
@@ -326,7 +331,7 @@ function tampilReveal(data) {
   document.getElementById('reveal-label').textContent = data.baru ? '✨ NEW!' : '🔁 DUPLIKAT'
   document.getElementById('reveal-label').style.color = data.baru ? 'var(--primary)' : 'var(--aksen)'
   const borderEl = document.getElementById('reveal-border')
-  borderEl.src = `assets/ui/border_${data.kartu.rarity}.png`
+  borderEl.src = `assets/ui/border_${data.kartu.rarity}.webp`
   revealWrap.classList.remove('gacha-reveal')
   void revealWrap.offsetWidth
   revealWrap.classList.add('gacha-reveal')

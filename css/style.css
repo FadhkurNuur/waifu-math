@@ -12,6 +12,7 @@
   --rarity-common: #B0B8C1;
   --rarity-rare: #A259FF;
   --rarity-epic: #F5C842;
+  --rarity-legendary: #FF3B30;
 }
 
 /* ===== Reset & Base ===== */
@@ -175,6 +176,7 @@ html, body {
 .badge-common { background: var(--rarity-common); color: #fff; }
 .badge-rare { background: var(--rarity-rare); color: #fff; }
 .badge-epic { background: var(--rarity-epic); color: #fff; }
+.badge-legendary { background: var(--rarity-legendary); color: #fff; }
 
 /* ===== Bottom Navigation ===== */
 .bottom-nav {
@@ -370,6 +372,7 @@ html, body {
 .fan-rare { transform: rotate(-30deg) translateX(-30px); z-index: 1; }
 .fan-epic { transform: rotate(0deg); z-index: 2; width: 100px !important; }
 .fan-common { transform: rotate(30deg) translateX(30px); z-index: 1; }
+.fan-legendary { transform: rotate(0deg); z-index: 3; width: 105px !important; }
 
 /* ===== Bintang ===== */
 .bintang-wrap {
